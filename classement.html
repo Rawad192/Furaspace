@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classement — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ── Hero podium ── */
+    .ranking-hero {
+      text-align: center;
+      padding: 2.5rem 1rem 3rem;
+      position: relative;
+    }
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem auto 0;
+      max-width: 500px;
+    }
+    .podium-place {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .podium-avatar-wrap {
+      position: relative;
+    }
+    .podium-rank-crown {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+    .podium-avatar {
+      border: 3px solid;
+      box-shadow: 0 0 20px currentColor;
+    }
+    .podium-place.rank-1 .podium-avatar { border-color: #fbbf24; }
+    .podium-place.rank-2 .podium-avatar { border-color: #9ca3af; }
+    .podium-place.rank-3 .podium-avatar { border-color: #92400e; }
+    .podium-pseudo {
+      font-size: var(--text-sm);
+      font-weight: 600;
+    }
+    .podium-score-val {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .podium-block {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      width: 90px;
+      font-size: var(--text-xl);
+      font-weight: 800;
+    }
+    .podium-place.rank-1 .podium-block { height: 80px; background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .podium-place.rank-2 .podium-block { height: 56px; background: rgba(156,163,175,0.2); color: #9ca3af; }
+    .podium-place.rank-3 .podium-block { height: 40px; background: rgba(146,64,14,0.2); color: #92400e; }
+
+    /* ── Tabs ── */
+    .ranking-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 1.5rem;
+    }
+    .ranking-tab {
+      padding: 0.75rem 1.5rem;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      background: none;
+      white-space: nowrap;
+    }
+    .ranking-tab:hover { color: var(--color-text); }
+    .ranking-tab.active {
+      color: var(--color-primary-light);
+      border-bottom-color: var(--color-primary);
+    }
+
+    /* ── Tableau classement ── */
+    .ranking-layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    .ranking-table-header {
+      display: grid;
+      grid-template-columns: 52px 1fr 80px 80px 80px;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: var(--text-xs);
+      color: var(--color-text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .ranking-row {
+      display: grid;
+      grid-template-columns: 52px 1fr 80px 80px 80px;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 0.5rem;
+      transition: border-color 0.2s, transform 0.15s;
+      cursor: pointer;
+    }
+    .ranking-row:hover {
+      border-color: rgba(108,62,184,0.4);
+      transform: translateX(2px);
+    }
+    .ranking-row.is-me {
+      border-color: rgba(108,62,184,0.6);
+      background: rgba(108,62,184,0.08);
+    }
+    .ranking-row.rank-gold   { border-left: 3px solid #fbbf24; }
+    .ranking-row.rank-silver { border-left: 3px solid #9ca3af; }
+    .ranking-row.rank-bronze { border-left: 3px solid #92400e; }
+    .rank-num {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      text-align: center;
+    }
+    .rank-gold-num   { color: #fbbf24; }
+    .rank-silver-num { color: #9ca3af; }
+    .rank-bronze-num { color: #92400e; }
+    .rank-default-num { color: var(--color-text-dim); font-size: var(--text-base); }
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+    .user-pseudo {
+      font-weight: 600;
+      font-size: var(--text-sm);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-const {
+      font-size: var(--text-xs);
+      color: var(--color-text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .score-cell {
+      font-weight: 700;
+      font-size: var(--text-sm);
+      color: var(--color-primary-light);
+      text-align: right;
+    }
+    .trend-cell {
+      font-size: var(--text-xs);
+      text-align: center;
+    }
+    .trend-up   { color: #10b981; }
+    .trend-down { color: #ef4444; }
+    .trend-flat { color: var(--color-text-dim); }
+    .region-cell {
+      font-size: var(--text-xs);
+      color: var(--color-text-dim);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar-stats { display: flex; flex-direction: column; gap: 1rem; }
+    .score-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .score-breakdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .score-bar-wrap {
+      flex: 1;
+      height: 4px;
+      background: var(--color-surface-2);
+      border-radius: 999px;
+      margin: 0 0.75rem;
+      overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%;
+      background: var(--color-primary);
+      border-radius: 999px;
+      transition: width 0.6s ease;
+    }
+    .score-bar-fill.green  { background: #10b981; }
+    .score-bar-fill.yellow { background: #f59e0b; }
+    .score-bar-fill.blue   { background: #3b82f6; }
+    .score-bar-fill.pink   { background: #ec4899; }
+    .score-val { min-width: 40px; text-align: right; font-weight: 600; }
+
+    /* ── Mon classement ── */
+    .my-rank-card {
+      background: linear-gradient(135deg, rgba(108,62,184,0.15), rgba(16,185,129,0.06));
+      border: 1px solid rgba(108,62,184,0.3);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+    }
+    .my-rank-pos {
+      font-size: var(--text-4xl, 3rem);
+      font-weight: 800;
+      color: var(--color-primary-light);
+      line-height: 1;
+    }
+    .my-rank-label { font-size: var(--text-xs); color: var(--color-text-dim); margin-bottom: 1rem; }
+    .my-rank-score { font-size: var(--text-2xl); font-weight: 700; }
+    .my-rank-delta {
+      font-size: var(--text-sm);
+      color: #10b981;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Constellations ranking ── */
+    .const-rank-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .const-rank-row:hover { border-color: rgba(108,62,184,0.4); }
+    .const-rank-num { font-size: var(--text-lg); font-weight: 700; width: 32px; text-align: center; }
+    .const-rank-info { flex: 1; }
+    .const-rank-name { font-weight: 600; font-size: var(--text-sm); }
+    .const-rank-meta { font-size: var(--text-xs); color: var(--color-text-dim); }
+    .const-rank-score { font-weight: 700; font-size: var(--text-sm); color: var(--color-primary-light); }
+
+    /* ── Période badge ── */
+    .period-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(108,62,184,0.15);
+      border: 1px solid rgba(108,62,184,0.3);
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      font-size: var(--text-xs);
+      color: var(--color-primary-light);
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .ranking-layout { grid-template-columns: 1fr; }
+      .ranking-table-header { display: none; }
+      .ranking-row { grid-template-columns: 40px 1fr auto; }
+      .trend-cell, .region-cell { display: none; }
+      .podium { max-width: 340px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Classement</h1>
+            <p class="page-subtitle">Les membres les plus actifs de la communauté AstroNuit</p>
+          </div>
+          <div class="period-badge" id="period-label">
+            📅 Février 2026 — Mensuel
+          </div>
+        </div>
+
+        <!-- Podium top 3 -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <div class="card-body">
+            <div class="podium" id="podium">
+              <!-- Généré par JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglets -->
+        <div class="ranking-tabs">
+          <button class="ranking-tab active" data-tab="monthly">🗓️ Ce mois-ci</button>
+          <button class="ranking-tab" data-tab="alltime">🏆 All-time</button>
+          <button class="ranking-tab" data-tab="constellations">✦ Constellations</button>
+        </div>
+
+        <div class="ranking-layout">
+          <!-- Colonne classement -->
+          <div>
+            <!-- En-têtes -->
+            <div class="ranking-table-header">
+              <div>#</div>
+              <div>Membre</div>
+              <div style="text-align:right;">Score</div>
+              <div style="text-align:center;">Évol.</div>
+              <div style="text-align:right;">Région</div>
+            </div>
+
+            <!-- Classement mensuel -->
+            <div id="tab-monthly">
+              <div id="leaderboard-monthly">
+                <!-- Injecté par JS -->
+              </div>
+            </div>
+
+            <!-- Classement all-time -->
+            <div id="tab-alltime" style="display:none;">
+              <div id="leaderboard-alltime">
+                <!-- Injecté par JS -->
+              </div>
+            </div>
+
+            <!-- Classement Constellations -->
+            <div id="tab-constellations" style="display:none;">
+              <div id="leaderboard-constellations">
+                <!-- Injecté par JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div>
+            <!-- Mon classement -->
+            <div class="card" style="margin-bottom: 1.5rem;" id="my-rank-card">
+              <div class="card-header"><h3 style="font-size:var(--text-base);">Mon classement</h3></div>
+              <div class="card-body">
+                <div class="my-rank-card">
+                  <div class="my-rank-pos" id="my-rank-pos">#24</div>
+                  <div class="my-rank-label">Ce mois-ci</div>
+                  <div class="my-rank-score" id="my-rank-score">1 480 pts</div>
+                  <div class="my-rank-delta" id="my-rank-delta">▲ +3 places cette semaine</div>
+                </div>
+                <a href="profil.html" class="btn btn-ghost btn-sm" style="width:100%; margin-top:1rem;">
+                  Voir mon profil →
+                </a>
+              </div>
+            </div>
+
+            <!-- Tableau de points -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+              <div class="card-header"><h3 style="font-size:var(--text-base);">Comment gagner des points</h3></div>
+              <div class="card-body">
+                <div class="score-breakdown">
+                  <div class="score-breakdown-item">
+                    <span>📍 Spot ajouté</span>
+                    <div class="score-bar-wrap"><div class="score-bar-fill blue" style="width:100%;"></div></div>
+                    <span class="score-val">+8</span>
+                  </div>
+                  <div class="score-breakdown-item">
+                    <span>📅 Sortie org.</span>
+                    <div class="score-bar-wrap"><div class="score-bar-fill" style="width:100%;"></div></div>
+                    <span class="score-val">+8</span>
+                  </div>
+                  <div class="score-breakdown-item">
+                    <span>📸 Photo publiée</span>
+                    <div class="score-bar-wrap"><div class="score-bar-fill yellow" style="width:62%;"></div></div>
+                    <span class="score-val">+5</span>
+                  </div>
+                  <div class="score-breakdown-item">
+                    <span>👣 Check-in</span>
+                    <div class="score-bar-wrap"><div class="score-bar-fill yellow" style="width:62%;"></div></div>
+                    <span class="score-val">+5</span>
+                  </div>
+                  <div class="score-breakdown-item">
+                    <span>💬 Commentaire</span>
+                    <div class="score-bar-wrap"><div class="score-bar-fill green" style="width:37%;"></div></div>
+                    <span class="score-val">+2</span>
+                  </div>
+                  <div class="score-breakdown-item">
+                    <span>❤️ Like reçu</span>
+                    <div class="score-bar-wrap"><div class="score-bar-fill green" style="width:25%;"></div></div>
+                    <span class="score-val">+1</span>
+                  </div>
+                  <div class="score-breakdown-item">
+                    <span>📆 Bonus hebdo</span>
+                    <div class="score-bar-wrap"><div class="score-bar-fill pink" style="width:75%;"></div></div>
+                    <span class="score-val">+5</span>
+                  </div>
+                </div>
+                <p style="font-size:var(--text-xs); color:var(--color-text-dim); margin-top:1rem; line-height:1.6;">
+                  Le classement mensuel est remis à zéro le 1er de chaque mois. Le classement all-time est cumulatif.
+                </p>
+              </div>
+            </div>
+
+            <!-- Badges disponibles -->
+            <div class="card">
+              <div class="card-header"><h3 style="font-size:var(--text-base);">Badges à débloquer</h3></div>
+              <div class="card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                  <div style="text-align:center; padding:0.75rem; background:var(--color-surface-2); border-radius:var(--radius-md);">
+                    <div style="font-size:1.5rem; margin-bottom:0.3rem;">🌟</div>
+                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Primo<br><span style="color:var(--color-text-dim);">1 spot</span></div>
+                  </div>
+                  <div style="text-align:center; padding:0.75rem; background:var(--color-surface-2); border-radius:var(--radius-md);">
+                    <div style="font-size:1.5rem; margin-bottom:0.3rem;">🗺️</div>
+                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Cartographe<br><span style="color:var(--color-text-dim);">5 spots</span></div>
+                  </div>
+                  <div style="text-align:center; padding:0.75rem; background:var(--color-surface-2); border-radius:var(--radius-md);">
+                    <div style="font-size:1.5rem; margin-bottom:0.3rem;">🔭</div>
+                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Passionné<br><span style="color:var(--color-text-dim);">10 spots</span></div>
+                  </div>
+                  <div style="text-align:center; padding:0.75rem; background:var(--color-surface-2); border-radius:var(--radius-md);">
+                    <div style="font-size:1.5rem; margin-bottom:0.3rem;">👣</div>
+                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Aventurier<br><span style="color:var(--color-text-dim);">10 check-ins</span></div>
+                  </div>
+                </div>
+                <a href="profil.html#badges" class="btn btn-ghost btn-sm" style="width:100%; margin-top:0.75rem;">
+                  Voir tous les badges →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit · Classement mis à jour toutes les heures · <a href="mentions-legales.html">Mentions légales</a></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/classement.page.js"></script>
+  <script src="js/ranking.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+// AstroNuit — Règles de sécurité Firebase Storage
+// Version : 2.0 — Phase 1
+//
+// Structure Storage :
+//   media/{uid}/{filename}         → photos/médias personnels
+//   lieux/{lieuId}/{filename}      → photos d'un spot
+//   avatars/{uid}/{filename}       → photos de profil
+//   events/{eventId}/{filename}    → bannières d'événements (optionnel)
+//
+// Contraintes globales :
+//   - Max 10 MB par fichier
+//   - Types autorisés : image/jpeg, image/png, image/webp
+//   - Toujours authentifié + email vérifié pour uploader
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function isVerified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return request.auth != null &&
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isValidImage() {
+      return request.resource.size <= 10 * 1024 * 1024 &&  // 10 MB max
+             request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    // ── Médias personnels : media/{uid}/{filename} ────────────────────────────
+    match /media/{userId}/{filename} {
+      // Lecture publique (URLs CDN Firebase)
+      allow read: if true;
+
+      // Upload : uniquement dans son propre dossier, fichier image valide
+      allow create: if isVerified() &&
+                       request.auth.uid == userId &&
+                       isValidImage() &&
+                       filename.matches('[a-zA-Z0-9_\\-]+\\.(jpg|jpeg|png|webp)');
+
+      // Remplacement : même utilisateur uniquement
+      allow update: if isVerified() && request.auth.uid == userId && isValidImage();
+
+      // Suppression : propriétaire ou admin
+      allow delete: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+    }
+
+    // ── Photos de spots : lieux/{lieuId}/{filename} ───────────────────────────
+    match /lieux/{lieuId}/{filename} {
+      allow read: if true;
+
+      // Tout membre vérifié peut poster une photo sur un spot
+      allow create: if isVerified() &&
+                       isValidImage() &&
+                       filename.matches('[a-zA-Z0-9_\\-]+\\.(jpg|jpeg|png|webp)');
+
+      // Suppression : admin ou modérateur (vérification via Firestore dans la CF applyPenalty)
+      allow delete: if isAdmin();
+    }
+
+    // ── Avatars de profil : avatars/{uid}/{filename} ──────────────────────────
+    match /avatars/{userId}/{filename} {
+      allow read: if true;
+
+      allow create, update: if isVerified() &&
+                                request.auth.uid == userId &&
+                                request.resource.size <= 2 * 1024 * 1024 && // 2 MB max pour les avatars
+                                request.resource.contentType.matches('image/(jpeg|png|webp)') &&
+                                filename.matches('[a-zA-Z0-9_\\-]+\\.(jpg|jpeg|png|webp)');
+
+      allow delete: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+    }
+
+    // ── Bannières d'événements : events/{eventId}/{filename} ─────────────────
+    match /events/{eventId}/{filename} {
+      allow read: if true;
+
+      allow create: if isVerified() &&
+                       isValidImage() &&
+                       filename.matches('[a-zA-Z0-9_\\-]+\\.(jpg|jpeg|png|webp)');
+
+      allow delete: if isAdmin();
+    }
+
+    // ── Tout le reste : refusé ────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

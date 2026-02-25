@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organiser une sortie — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/create-event.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Organiser une sortie</h1>
+            <p class="page-subtitle">Partagez votre passion et rassemblez la communauté</p>
+          </div>
+        </div>
+
+        <!-- Vérification membre vérifié -->
+        <div class="alert-card card" id="alert-not-verified" style="display:none;">
+          <div class="card-body" style="text-align:center; padding: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+            <h2>Membre vérifié requis</h2>
+            <p style="color: var(--color-text-muted); margin-top: 1rem;">
+              Seuls les membres vérifiés peuvent organiser des sorties.
+              Votre compte est en cours de validation — vous pourrez créer des sorties sous 24h.
+            </p>
+            <a href="evenements.html" class="btn btn-primary" style="margin-top: 1.5rem;">
+              Voir les sorties existantes
+            </a>
+          </div>
+        </div>
+
+        <!-- Formulaire création -->
+        <form id="form-create-event" class="create-event-layout">
+          <!-- Étapes -->
+          <div class="steps-indicator">
+            <div class="step-ind active" data-step="1">
+              <div class="step-num">1</div>
+              <div class="step-name">Infos générales</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-ind" data-step="2">
+              <div class="step-num">2</div>
+              <div class="step-name">Lieu & carte</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-ind" data-step="3">
+              <div class="step-num">3</div>
+              <div class="step-name">Détails & confirmation</div>
+            </div>
+          </div>
+
+          <!-- Étape 1 : Infos générales -->
+          <div class="form-step" id="step-1">
+            <div class="card">
+              <div class="card-header"><h2>Informations générales</h2></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Titre de la sortie *</label>
+                  <input type="text" class="form-input" id="ev-title"
+                    placeholder="Ex: Perséides 2025 — Alpes-de-Haute-Provence" required>
+                  <span class="form-hint">Soyez précis et accrocheur</span>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Type d'observation *</label>
+                    <select class="form-select" id="ev-type" required>
+                      <option value="">Choisissez...</option>
+                      <option>Pluie de météorites</option>
+                      <option>Opposition planétaire</option>
+                      <option>Voie Lactée</option>
+                      <option>Éclipse</option>
+                      <option>Débutants bienvenus</option>
+                      <option>Astrophotographie</option>
+                      <option>Observation libre</option>
+                      <option>Occultation</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Niveau requis</label>
+                    <select class="form-select" id="ev-level">
+                      <option value="all">Tous niveaux</option>
+                      <option value="beginner">Débutant</option>
+                      <option value="intermediate">Intermédiaire</option>
+                      <option value="expert">Expert</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Date *</label>
+                    <input type="date" class="form-input" id="ev-date" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Heure de début *</label>
+                    <input type="time" class="form-input" id="ev-start" value="21:00" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Heure de fin</label>
+                    <input type="time" class="form-input" id="ev-end" value="01:00">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Nombre de places maximum *</label>
+                    <input type="number" class="form-input" id="ev-max" min="2" max="200" value="20" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Matériel mis à disposition</label>
+                    <input type="text" class="form-input" id="ev-equipment"
+                      placeholder="Ex: Dobson 200mm, jumelles...">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Description *</label>
+                  <textarea class="form-textarea" id="ev-description" rows="6"
+                    placeholder="Décrivez le programme de la soirée, les objets à observer, les conditions attendues..." required></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="step-actions">
+              <div></div>
+              <button type="button" class="btn btn-primary" onclick="goToStep(2)">
+                Suivant : Lieu →
+              </button>
+            </div>
+          </div>
+
+          <!-- Étape 2 : Lieu -->
+          <div class="form-step" id="step-2" style="display:none;">
+            <div class="card">
+              <div class="card-header"><h2>Lieu de rendez-vous</h2></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Adresse ou nom du lieu *</label>
+                  <input type="text" class="form-input" id="ev-location"
+                    placeholder="Ex: Plateau de Valensole, 04210 Valensole" required>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Latitude</label>
+                    <input type="number" class="form-input" id="ev-lat" step="0.0001" placeholder="43.8341">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Longitude</label>
+                    <input type="number" class="form-input" id="ev-lng" step="0.0001" placeholder="5.9839">
+                  </div>
+                  <div class="form-group" style="align-self:flex-end;">
+                    <button type="button" class="btn btn-ghost" style="width:100%;" id="btn-locate-event">
+                      📍 Ma position
+                    </button>
+                  </div>
+                </div>
+
+                <p class="form-hint" style="margin-bottom:1rem;">
+                  Cliquez sur la carte pour définir le point de rendez-vous précis
+                </p>
+                <div id="create-map" style="height: 400px; border-radius: var(--radius-xl);"></div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                  <label class="form-label">Indice Bortle estimé</label>
+                  <select class="form-select" id="ev-bortle">
+                    <option value="">Je ne sais pas</option>
+                    <option value="1">1 — Ciel noir exceptionnel</option>
+                    <option value="2">2 — Ciel noir vrai</option>
+                    <option value="3">3 — Rural</option>
+                    <option value="4">4 — Rural / Suburban</option>
+                    <option value="5">5 — Suburban</option>
+                    <option value="6">6 — Suburban brillant</option>
+                    <option value="7">7 — Transitoire</option>
+                    <option value="8">8 — Urbain</option>
+                    <option value="9">9 — Cœur de ville</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Instructions d'accès</label>
+                  <textarea class="form-textarea" id="ev-access" rows="3"
+                    placeholder="Comment accéder au lieu (route, parking, points de repère...)"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="step-actions">
+              <button type="button" class="btn btn-ghost" onclick="goToStep(1)">← Retour</button>
+              <button type="button" class="btn btn-primary" onclick="goToStep(3)">Suivant : Confirmation →</button>
+            </div>
+          </div>
+
+          <!-- Étape 3 : Confirmation -->
+          <div class="form-step" id="step-3" style="display:none;">
+            <div class="card">
+              <div class="card-header"><h2>Aperçu et confirmation</h2></div>
+              <div class="card-body">
+                <div class="preview-event" id="event-preview">
+                  <!-- Généré par JS -->
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="ev-confirm" required>
+                    <span>Je confirme les informations ci-dessus et respecterai la <a href="#">charte des organisateurs</a></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="step-actions">
+              <button type="button" class="btn btn-ghost" onclick="goToStep(2)">← Retour</button>
+              <button type="submit" class="btn btn-accent btn-lg">
+                ✨ Publier la sortie
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom"><p>© 2025 AstroNuit</p></div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/creer-evenement.page.js"></script>
+</body>
+</html>

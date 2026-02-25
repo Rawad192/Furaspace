@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/auth.css">
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+      </div>
+    </nav>
+
+    <main class="auth-main">
+      <div class="auth-container">
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Connexion</button>
+          <button class="auth-tab" data-tab="register">Inscription</button>
+        </div>
+
+        <!-- Login -->
+        <div class="auth-panel" id="panel-login">
+          <div class="auth-header">
+            <div class="auth-icon">✦</div>
+            <h1>Bon retour parmi les étoiles</h1>
+            <p>Connectez-vous pour accéder aux sorties</p>
+          </div>
+
+          <form class="auth-form" id="form-login">
+            <div class="form-group">
+              <label class="form-label">Adresse email</label>
+              <input type="email" class="form-input" id="login-email" placeholder="vous@exemple.fr" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">
+                Mot de passe
+                <a href="#" class="forgot-link">Oublié ?</a>
+              </label>
+              <div class="input-password">
+                <input type="password" class="form-input" id="login-password" placeholder="••••••••" required>
+                <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">👁</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;" id="btn-login-submit">
+              Se connecter
+            </button>
+
+            <div class="auth-divider">
+              <span>ou</span>
+            </div>
+
+            <button type="button" class="btn btn-ghost btn-lg" style="width:100%;" id="btn-google">
+              <img src="https://www.google.com/favicon.ico" width="18" alt="Google">
+              Continuer avec Google
+            </button>
+          </form>
+        </div>
+
+        <!-- Register -->
+        <div class="auth-panel" id="panel-register" style="display:none;">
+          <div class="auth-header">
+            <div class="auth-icon">🔭</div>
+            <h1>Rejoignez la communauté</h1>
+            <p>Créez votre profil d'astronome amateur</p>
+          </div>
+
+          <form class="auth-form" id="form-register">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Pseudo *</label>
+                <input type="text" class="form-input" id="reg-pseudo" placeholder="stargazer42" required>
+                <span class="form-hint">Visible par les autres membres</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-input" id="reg-email" placeholder="vous@exemple.fr" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mot de passe *</label>
+              <div class="input-password">
+                <input type="password" class="form-input" id="reg-password" placeholder="Minimum 8 caractères" required>
+                <button type="button" class="toggle-password" aria-label="Afficher">👁</button>
+              </div>
+              <div class="password-strength" id="password-strength">
+                <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+                <span class="strength-label" id="strength-label">Entrez un mot de passe</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Région</label>
+                <select class="form-select" id="reg-region">
+                  <option value="">Sélectionnez...</option>
+                  <option>Île-de-France</option>
+                  <option>Auvergne-Rhône-Alpes</option>
+                  <option>Bretagne</option>
+                  <option>Occitanie</option>
+                  <option>Provence-Alpes-Côte d'Azur</option>
+                  <option>Normandie</option>
+                  <option>Nouvelle-Aquitaine</option>
+                  <option>Grand Est</option>
+                  <option>Hauts-de-France</option>
+                  <option>Centre-Val de Loire</option>
+                  <option>Bourgogne-Franche-Comté</option>
+                  <option>Pays de la Loire</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Niveau</label>
+                <select class="form-select" id="reg-level">
+                  <option value="beginner">Débutant</option>
+                  <option value="intermediate">Intermédiaire</option>
+                  <option value="expert">Expert</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Matériel (optionnel)</label>
+              <input type="text" class="form-input" id="reg-equipment"
+                placeholder="Ex: Dobson 200mm, APN Canon EOS...">
+              <span class="form-hint">Partagez votre équipement avec la communauté</span>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="reg-terms" required>
+                <span>J'accepte la <a href="#">charte communautaire</a> et les <a href="#">mentions légales</a></span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-accent btn-lg" style="width:100%;" id="btn-register-submit">
+              Rejoindre AstroNuit 🚀
+            </button>
+
+            <div class="auth-notice">
+              <span class="notice-icon">⏳</span>
+              <p>Votre compte sera activé après vérification par notre équipe (généralement sous 24h).</p>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Déco cosmique -->
+      <div class="auth-decoration">
+        <div class="auth-nebula auth-nebula-1"></div>
+        <div class="auth-nebula auth-nebula-2"></div>
+        <div class="auth-planet auth-saturn"></div>
+        <div class="auth-stats">
+          <div class="auth-stat">
+            <span class="stat-number">842</span>
+            <span class="stat-label">Membres</span>
+          </div>
+          <div class="auth-stat">
+            <span class="stat-number">127</span>
+            <span class="stat-label">Sorties</span>
+          </div>
+          <div class="auth-stat">
+            <span class="stat-number">58</span>
+            <span class="stat-label">Sites</span>
+          </div>
+        </div>
+        <blockquote class="auth-quote">
+          "Le cosmos est en nous. Nous sommes faits de poussière d'étoiles."
+          <cite>— Carl Sagan</cite>
+        </blockquote>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/connexion.page.js"></script>
+</body>
+</html>

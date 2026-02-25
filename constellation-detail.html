@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constellation — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ── Hero Constellation ── */
+    .const-hero {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .const-hero-banner {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+    }
+    .const-hero-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, var(--color-surface) 100%);
+    }
+    .const-hero-body { padding: 1.5rem 2rem; }
+    .const-hero-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .const-hero-info { flex: 1; }
+    .const-hero-name {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .const-hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .const-leader-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(251,191,36,0.15);
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 999px;
+      padding: 0.15rem 0.6rem;
+      font-size: var(--text-xs);
+      color: #fbbf24;
+    }
+    .const-hero-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Layout 2 colonnes ── */
+    .const-detail-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Fil d'activité ── */
+    .activity-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 1.5rem;
+    }
+    .activity-tab {
+      padding: 0.75rem 1.25rem;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      background: none;
+    }
+    .activity-tab:hover { color: var(--color-text); }
+    .activity-tab.active {
+      color: var(--color-primary-light);
+      border-bottom-color: var(--color-primary);
+    }
+
+    /* ── Post ── */
+    .const-post {
+      display: flex;
+      gap: 1rem;
+      padding: 1.25rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+    }
+    .const-post:hover { border-color: var(--color-border-hover); }
+    .const-post.pinned {
+      border-color: rgba(251,191,36,0.3);
+      background: rgba(251,191,36,0.04);
+    }
+    .const-post-pin {
+      font-size: var(--text-xs);
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .const-post-body { flex: 1; }
+    .const-post-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .const-post-author { font-weight: 600; font-size: var(--text-sm); }
+    .const-post-date { font-size: var(--text-xs); color: var(--color-text-dim); }
+    .const-post-text {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+    .const-post-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .post-action-btn {
+      background: none;
+      border: none;
+      font-size: var(--text-xs);
+      color: var(--color-text-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.5rem;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s, color 0.15s;
+    }
+    .post-action-btn:hover {
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+    }
+    .post-action-btn.liked { color: #f472b6; }
+
+    /* ── Événements linked ── */
+    .const-event-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.75rem;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+    .const-event-row:hover { border-color: rgba(108,62,184,0.4); }
+    .const-event-date-box {
+      min-width: 52px;
+      text-align: center;
+      background: rgba(108,62,184,0.15);
+      border-radius: var(--radius-md);
+      padding: 0.5rem;
+    }
+    .const-event-date-num {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-primary-light);
+      line-height: 1;
+    }
+    .const-event-date-month {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .const-event-info { flex: 1; }
+    .const-event-title {
+      font-weight: 600;
+      font-size: var(--text-sm);
+      margin-bottom: 0.2rem;
+    }
+    .const-event-meta {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+
+    /* ── Sidebar ── */
+    .const-sidebar-section { margin-bottom: 1.5rem; }
+    .member-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .member-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: var(--radius-md);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .member-row:hover { background: var(--color-surface-2); }
+    .member-info { flex: 1; min-width: 0; }
+    .member-pseudo {
+      font-size: var(--text-sm);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .member-level {
+      font-size: var(--text-xs);
+      color: var(--color-text-dim);
+    }
+    .member-score {
+      font-size: var(--text-xs);
+      color: var(--color-primary-light);
+      font-weight: 600;
+    }
+
+    /* ── Stats sidebar ── */
+    .const-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .const-stat-box {
+      background: var(--color-surface-2);
+      border-radius: var(--radius-md);
+      padding: 0.875rem;
+      text-align: center;
+    }
+    .const-stat-box-num {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-primary-light);
+      display: block;
+    }
+    .const-stat-box-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-dim);
+    }
+
+    /* ── Post composer ── */
+    .post-composer {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 1.5rem;
+    }
+    .post-composer textarea {
+      flex: 1;
+      resize: none;
+      min-height: 60px;
+    }
+    .post-composer-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 900px) {
+      .const-detail-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .const-hero-body { padding: 1rem; }
+      .const-hero-top { flex-direction: column; gap: 1rem; }
+      .const-hero-actions { width: 100%; }
+      .const-hero-actions .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <!-- Fil d'ariane -->
+        <nav class="breadcrumb">
+          <a href="constellations.html">Constellations</a>
+          <span>›</span>
+          <span id="const-breadcrumb">Observateurs du Vercors</span>
+        </nav>
+
+        <!-- Hero -->
+        <div class="const-hero card" id="const-hero">
+          <div class="const-hero-banner" id="const-banner" style="background: linear-gradient(135deg, #1a0533, #0d2a1a);">
+            <span style="position:relative;z-index:1;">🌌</span>
+          </div>
+          <div class="const-hero-body">
+            <div class="const-hero-top">
+              <div class="const-hero-info">
+                <h1 class="const-hero-name" id="const-name">Observateurs du Vercors</h1>
+                <div class="const-hero-meta">
+                  <div class="const-leader-row">
+                    <div class="avatar" style="width:28px;height:28px;font-size:.7rem;" id="leader-avatar">A</div>
+                    <span>Leader :</span>
+                    <a href="profil.html" id="leader-link" style="color: var(--color-primary-light);">@astronome_pro</a>
+                    <span class="verified-badge" id="leader-verified-badge">⭐ Vérifié</span>
+                  </div>
+                  <span class="badge badge-primary" id="const-region-badge">Auvergne-RA</span>
+                  <span style="color: var(--color-text-dim); font-size: var(--text-xs);" id="const-created">Créée en janvier 2025</span>
+                </div>
+                <p style="color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.6;" id="const-description">
+                  Groupe d'astronomes amateurs basés dans le Vercors et ses alentours. Nous nous retrouvons chaque nouvelle lune pour des sorties d'observation depuis nos spots favoris avec Bortle ≤ 3. Débutants bienvenus !
+                </p>
+              </div>
+              <div class="const-hero-actions" id="const-hero-actions">
+                <button class="btn btn-accent btn-lg" id="btn-join-const">
+                  ✦ Rejoindre
+                </button>
+                <button class="btn btn-ghost btn-sm" id="btn-share-const">
+                  🔗 Partager
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="const-detail-layout">
+          <!-- Colonne principale : fil d'activité -->
+          <div>
+            <!-- Composer (visible si membre) -->
+            <div class="post-composer" id="post-composer" style="display:none;">
+              <div class="avatar" id="composer-avatar">?</div>
+              <textarea class="form-textarea" id="post-content"
+                placeholder="Partagez une observation, une astuce, une photo de sortie..."></textarea>
+              <div class="post-composer-actions">
+                <button class="btn btn-primary btn-sm" id="btn-post">Publier</button>
+              </div>
+            </div>
+
+            <!-- Onglets -->
+            <div class="activity-tabs">
+              <button class="activity-tab active" data-tab="posts">💬 Discussion</button>
+              <button class="activity-tab" data-tab="events">📅 Sorties</button>
+              <button class="activity-tab" data-tab="photos">📸 Photos</button>
+            </div>
+
+            <!-- Panneau posts -->
+            <div id="tab-posts">
+              <div id="posts-list">
+                <!-- Post épinglé -->
+                <div class="const-post pinned">
+                  <div class="avatar" style="width:36px;height:36px;font-size:.8rem;background:rgba(108,62,184,.3);">A</div>
+                  <div class="const-post-body">
+                    <div class="const-post-pin">📌 Épinglé par le leader</div>
+                    <div class="const-post-header">
+                      <span class="const-post-author">@astronome_pro</span>
+                      <span class="badge badge-primary" style="font-size:.6rem;">Leader</span>
+                      <span class="const-post-date">15 janvier 2025</span>
+                    </div>
+                    <div class="const-post-text">
+                      Bienvenue dans la Constellation Observateurs du Vercors ! 🎉<br><br>
+                      Prochaine sortie : <strong>12 août 2025</strong> pour les Perséides depuis le Plateau de Valensole. Inscrivez-vous vite, 30 places disponibles ! Tous niveaux bienvenus, matériel prêté sur place.
+                    </div>
+                    <div class="const-post-actions">
+                      <button class="post-action-btn" data-post="pin1">❤️ 24</button>
+                      <button class="post-action-btn">💬 8 réponses</button>
+                      <button class="post-action-btn">🔗 Copier le lien</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="const-post">
+                  <div class="avatar" style="width:36px;height:36px;font-size:.8rem;">M</div>
+                  <div class="const-post-body">
+                    <div class="const-post-header">
+                      <span class="const-post-author">@mariefils</span>
+                      <span class="const-post-date">Il y a 3 jours</span>
+                    </div>
+                    <div class="const-post-text">
+                      Superbe nuit hier soir au Col de Vence ! J'ai réussi à imager M42 pour la première fois avec mon APS-C. La turbu était un peu forte mais le seeing s'est amélioré après minuit. Quelqu'un d'autre y était ?
+                    </div>
+                    <div class="const-post-actions">
+                      <button class="post-action-btn liked">❤️ 12</button>
+                      <button class="post-action-btn">💬 3 réponses</button>
+                      <button class="post-action-btn">🔗 Copier le lien</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="const-post">
+                  <div class="avatar" style="width:36px;height:36px;font-size:.8rem;background:rgba(16,185,129,.25);">T</div>
+                  <div class="const-post-body">
+                    <div class="const-post-header">
+                      <span class="const-post-author">@telescope_thomas</span>
+                      <span class="const-post-date">Il y a 1 semaine</span>
+                    </div>
+                    <div class="const-post-text">
+                      Quelqu'un connaît un bon spot autour de Romans-sur-Isère avec accès voiture ? Bortle ≤ 4 si possible, j'ai un Dobson 200mm assez lourd à transporter.
+                    </div>
+                    <div class="const-post-actions">
+                      <button class="post-action-btn">❤️ 5</button>
+                      <button class="post-action-btn">💬 7 réponses</button>
+                      <button class="post-action-btn">🔗 Copier le lien</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn btn-outline btn-sm" style="width:100%; margin-top:0.5rem;" id="btn-load-posts">
+                Charger plus de messages
+              </button>
+            </div>
+
+            <!-- Panneau événements -->
+            <div id="tab-events" style="display:none;">
+              <div class="const-event-row" onclick="location.href='evenement-detail.html'">
+                <div class="const-event-date-box">
+                  <div class="const-event-date-num">12</div>
+                  <div class="const-event-date-month">Août</div>
+                </div>
+                <div class="const-event-info">
+                  <div class="const-event-title">Perséides 2025 — Plateau de Valensole</div>
+                  <div class="const-event-meta">📍 Valensole (04) · 22h00 · 16 / 30 participants</div>
+                </div>
+                <span class="badge badge-accent">Places dispo</span>
+              </div>
+              <div class="const-event-row">
+                <div class="const-event-date-box">
+                  <div class="const-event-date-num">27</div>
+                  <div class="const-event-date-month">Août</div>
+                </div>
+                <div class="const-event-info">
+                  <div class="const-event-title">Saturne à l'opposition — Vercors</div>
+                  <div class="const-event-meta">📍 Col de Rousset (26) · 23h00 · 8 / 20 participants</div>
+                </div>
+                <span class="badge badge-primary">Inscrit</span>
+              </div>
+              <div class="const-event-row" style="opacity: 0.5;">
+                <div class="const-event-date-box">
+                  <div class="const-event-date-num">02</div>
+                  <div class="const-event-date-month">Juil.</div>
+                </div>
+                <div class="const-event-info">
+                  <div class="const-event-title">Voie Lactée depuis Glandasse</div>
+                  <div class="const-event-meta">📍 Glandasse (26) · Terminée · 22 participants</div>
+                </div>
+                <span class="badge" style="background:var(--color-surface-2); color:var(--color-text-dim);">Passée</span>
+              </div>
+            </div>
+
+            <!-- Panneau photos -->
+            <div id="tab-photos" style="display:none;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
+                <div style="background:linear-gradient(135deg,#1a0533,#0d2a1a); border-radius: var(--radius-md); aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:3rem; cursor:pointer;">🌌</div>
+                <div style="background:linear-gradient(135deg,#0d1b4b,#1a3333); border-radius: var(--radius-md); aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:3rem; cursor:pointer;">🪐</div>
+                <div style="background:linear-gradient(135deg,#1a1a3e,#0a0a1a); border-radius: var(--radius-md); aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:3rem; cursor:pointer;">☄️</div>
+                <div style="background:linear-gradient(135deg,#2a0533,#1a1a3e); border-radius: var(--radius-md); aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:3rem; cursor:pointer;">🔭</div>
+              </div>
+              <a href="galerie.html" class="btn btn-outline btn-sm" style="width:100%; margin-top:1rem;">
+                Voir toutes les photos →
+              </a>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div>
+            <!-- Stats -->
+            <div class="card const-sidebar-section">
+              <div class="card-body">
+                <h3 style="margin-bottom: 1rem; font-size: var(--text-base);">Statistiques</h3>
+                <div class="const-stats-grid">
+                  <div class="const-stat-box">
+                    <span class="const-stat-box-num" id="stat-members-count">28</span>
+                    <span class="const-stat-box-label">Membres</span>
+                  </div>
+                  <div class="const-stat-box">
+                    <span class="const-stat-box-num" id="stat-events-count">14</span>
+                    <span class="const-stat-box-label">Sorties</span>
+                  </div>
+                  <div class="const-stat-box">
+                    <span class="const-stat-box-num" id="stat-spots-count">47</span>
+                    <span class="const-stat-box-label">Spots</span>
+                  </div>
+                  <div class="const-stat-box">
+                    <span class="const-stat-box-num" id="stat-photos-count">183</span>
+                    <span class="const-stat-box-label">Photos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Membres -->
+            <div class="card const-sidebar-section">
+              <div class="card-header">
+                <h3 style="font-size: var(--text-base);">Membres actifs</h3>
+                <span class="badge badge-primary" id="members-count-badge">28</span>
+              </div>
+              <div class="card-body">
+                <div class="member-list" id="members-list">
+                  <div class="member-row">
+                    <div class="avatar" style="width:36px;height:36px;font-size:.8rem;background:rgba(108,62,184,.3);">A</div>
+                    <div class="member-info">
+                      <div class="member-pseudo">@astronome_pro <span style="color:#fbbf24; font-size:.7rem;">⭐</span></div>
+                      <div class="member-level">Expert · Leader</div>
+                    </div>
+                    <span class="member-score">4 820 pts</span>
+                  </div>
+                  <div class="member-row">
+                    <div class="avatar" style="width:36px;height:36px;font-size:.8rem;">M</div>
+                    <div class="member-info">
+                      <div class="member-pseudo">@mariefils</div>
+                      <div class="member-level">Intermédiaire</div>
+                    </div>
+                    <span class="member-score">2 140 pts</span>
+                  </div>
+                  <div class="member-row">
+                    <div class="avatar" style="width:36px;height:36px;font-size:.8rem;background:rgba(16,185,129,.25);">T</div>
+                    <div class="member-info">
+                      <div class="member-pseudo">@telescope_thomas</div>
+                      <div class="member-level">Débutant</div>
+                    </div>
+                    <span class="member-score">680 pts</span>
+                  </div>
+                  <div class="member-row">
+                    <div class="avatar" style="width:36px;height:36px;font-size:.8rem;background:rgba(59,130,246,.25);">J</div>
+                    <div class="member-info">
+                      <div class="member-pseudo">@julien_astro</div>
+                      <div class="member-level">Intermédiaire</div>
+                    </div>
+                    <span class="member-score">1 390 pts</span>
+                  </div>
+                </div>
+                <button class="btn btn-ghost btn-sm" style="width:100%; margin-top:0.75rem;" id="btn-see-all-members">
+                  Voir tous les membres (28) →
+                </button>
+              </div>
+            </div>
+
+            <!-- Spots de la Constellation -->
+            <div class="card const-sidebar-section">
+              <div class="card-header"><h3 style="font-size: var(--text-base);">Spots favoris</h3></div>
+              <div class="card-body">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;" id="const-spots-list">
+                  <a href="lieu-detail.html" style="display:flex; gap:0.75rem; align-items:center; padding:0.5rem; border-radius:var(--radius-md); text-decoration:none; transition:background 0.15s;" onmouseover="this.style.background='var(--color-surface-2)'" onmouseout="this.style.background='transparent'">
+                    <span style="font-size:1.2rem;">🌌</span>
+                    <div>
+                      <div style="font-size:var(--text-sm); font-weight:500; color:var(--color-text);">Plateau de Valensole</div>
+                      <div style="font-size:var(--text-xs); color:var(--color-text-dim);">Bortle 2 · PACA</div>
+                    </div>
+                  </a>
+                  <a href="lieu-detail.html" style="display:flex; gap:0.75rem; align-items:center; padding:0.5rem; border-radius:var(--radius-md); text-decoration:none; transition:background 0.15s;" onmouseover="this.style.background='var(--color-surface-2)'" onmouseout="this.style.background='transparent'">
+                    <span style="font-size:1.2rem;">🏔️</span>
+                    <div>
+                      <div style="font-size:var(--text-sm); font-weight:500; color:var(--color-text);">Col de Rousset</div>
+                      <div style="font-size:var(--text-xs); color:var(--color-text-dim);">Bortle 3 · Vercors</div>
+                    </div>
+                  </a>
+                  <a href="lieux.html" style="font-size:var(--text-xs); color:var(--color-primary-light); padding:0.5rem; display:block;">
+                    Voir tous les spots →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit · <a href="mentions-legales.html">Mentions légales</a> · <a href="charte.html">Charte</a></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/constellation-detail.page.js"></script>
+  <script src="js/constellation-detail.js"></script>
+</body>
+</html>

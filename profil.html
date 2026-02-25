@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon profil — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/profile.css">
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <div class="navbar-user" id="navbar-user">
+            <div class="avatar" id="user-avatar">A</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <!-- En-tête profil -->
+        <div class="profile-header card">
+          <div class="profile-banner">
+            <div class="profile-banner-bg"></div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-avatar-wrap">
+              <div class="avatar profile-avatar" id="profile-avatar">A</div>
+              <button class="avatar-edit-btn" id="btn-edit-avatar" title="Changer la photo">✏️</button>
+            </div>
+            <div class="profile-details">
+              <div class="profile-name-row">
+                <h1 id="profile-pseudo">@astronome_pro</h1>
+                <span class="badge badge-primary" id="profile-level">Expert</span>
+                <span class="badge badge-success" id="profile-status">Membre vérifié</span>
+              </div>
+              <div class="profile-meta">
+                <span>📍 <span id="profile-region">Provence-Alpes-Côte d'Azur</span></span>
+                <span>📅 Membre depuis <span id="profile-since">janvier 2024</span></span>
+                <span>
+                  <button class="btn btn-ghost btn-sm" id="btn-followers" style="padding:0;font-size:var(--text-sm);color:var(--color-text-muted);">
+                    <strong id="followers-count">142</strong> abonnés
+                  </button>
+                </span>
+                <span>
+                  <button class="btn btn-ghost btn-sm" id="btn-following" style="padding:0;font-size:var(--text-sm);color:var(--color-text-muted);">
+                    <strong id="following-count">38</strong> suivis
+                  </button>
+                </span>
+              </div>
+              <p class="profile-equipment" id="profile-equipment">
+                🔭 Dobson 250mm · APN Sony A7III · Monture EQ6-R Pro
+              </p>
+            </div>
+            <div class="profile-actions">
+              <button class="btn btn-primary btn-sm" id="btn-follow" style="display:none;">+ Suivre</button>
+              <button class="btn btn-outline" id="btn-edit-profile">✏️ Modifier</button>
+              <button class="btn btn-ghost" id="btn-logout">Déconnexion</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="profile-stats-grid">
+          <div class="profile-stat card">
+            <div class="card-body" style="text-align:center;">
+              <div class="stat-big" id="stat-organized">28</div>
+              <div class="stat-label">Sorties organisées</div>
+            </div>
+          </div>
+          <div class="profile-stat card">
+            <div class="card-body" style="text-align:center;">
+              <div class="stat-big" id="stat-attended">64</div>
+              <div class="stat-label">Sorties participées</div>
+            </div>
+          </div>
+          <div class="profile-stat card">
+            <div class="card-body" style="text-align:center;">
+              <div class="stat-big" id="stat-photos">47</div>
+              <div class="stat-label">Photos partagées</div>
+            </div>
+          </div>
+          <div class="profile-stat card">
+            <div class="card-body" style="text-align:center;">
+              <div class="rating-display">
+                <div class="stat-big" id="stat-rating">4.2</div>
+                <div class="stars" id="stat-stars">
+                  <span class="star filled">★</span>
+                  <span class="star filled">★</span>
+                  <span class="star filled">★</span>
+                  <span class="star filled">★</span>
+                  <span class="star">★</span>
+                </div>
+              </div>
+              <div class="stat-label">Note organisateur (<span id="stat-rating-count">12</span> avis)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats spots -->
+        <div class="profile-stats-grid" style="grid-template-columns:repeat(3,1fr);margin-top:0;">
+          <div class="profile-stat card">
+            <div class="card-body" style="text-align:center;">
+              <div class="stat-big" id="stat-spots-added" style="color:var(--color-accent);">28</div>
+              <div class="stat-label">Spots ajoutés</div>
+            </div>
+          </div>
+          <div class="profile-stat card">
+            <div class="card-body" style="text-align:center;">
+              <div class="stat-big" id="stat-checkins" style="color:var(--color-accent);">73</div>
+              <div class="stat-label">Check-ins</div>
+            </div>
+          </div>
+          <div class="profile-stat card">
+            <div class="card-body" style="text-align:center;">
+              <div class="stat-big" id="stat-depts" style="color:var(--color-accent);">14</div>
+              <div class="stat-label">Départements visités</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs contenu -->
+        <div class="profile-tabs">
+          <button class="profile-tab active" data-tab="events">Mes sorties</button>
+          <button class="profile-tab" data-tab="lieux">📍 Mes spots</button>
+          <button class="profile-tab" data-tab="badges">🏆 Badges</button>
+          <button class="profile-tab" data-tab="photos">Mes photos</button>
+          <button class="profile-tab" data-tab="reviews">Avis reçus</button>
+          <button class="profile-tab" data-tab="settings">Paramètres</button>
+        </div>
+
+        <!-- Mes sorties -->
+        <div class="profile-panel" id="panel-events">
+          <div class="panel-subheader">
+            <h2>Mes prochaines sorties</h2>
+            <a href="creer-evenement.html" class="btn btn-primary btn-sm">+ Organiser</a>
+          </div>
+          <div class="grid grid-3" id="profile-events-grid">
+            <div class="card event-card">
+              <div class="event-card-image" style="background:linear-gradient(135deg,#1a0533,#0d1b4b);">🌌</div>
+              <div class="event-card-body">
+                <div class="badge badge-accent" style="margin-bottom:.75rem;">Organisateur</div>
+                <h3 class="event-card-title">Perséides 2025 — Alpes-de-Haute-Provence</h3>
+                <div class="event-meta-item"><span class="icon">📅</span><span>12 août 2025</span></div>
+                <div class="event-meta-item"><span class="icon">👥</span><span>14/30 inscrits</span></div>
+                <div class="event-card-footer">
+                  <span class="badge badge-success">Actif</span>
+                  <a href="evenement-detail.html" class="btn btn-ghost btn-sm">Gérer →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-subheader" style="margin-top:2rem;">
+            <h2>Sorties passées</h2>
+          </div>
+          <div class="past-events-list" id="profile-past-events">
+            <div class="past-event-item">
+              <span class="past-event-icon">🌙</span>
+              <div>
+                <strong>Nuit Voie Lactée — Cévennes</strong>
+                <p>25 juin 2025 · 22 participants</p>
+              </div>
+              <div class="stars">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+              </div>
+            </div>
+            <div class="past-event-item">
+              <span class="past-event-icon">🪐</span>
+              <div>
+                <strong>Opposition Saturne — PACA</strong>
+                <p>15 mai 2025 · 18 participants</p>
+              </div>
+              <div class="stars">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star">★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mes spots -->
+        <div class="profile-panel" id="panel-lieux" style="display:none;">
+          <div class="panel-subheader">
+            <h2>Mes spots ajoutés</h2>
+            <a href="ajouter-lieu.html" class="btn btn-accent btn-sm">+ Ajouter un spot</a>
+          </div>
+          <div class="grid grid-3" id="profile-lieux-grid">
+            <!-- Rendu par js/badges.js -->
+          </div>
+
+          <div class="panel-subheader" style="margin-top:var(--space-8);">
+            <h2>🗺️ Carte de France — Départements visités</h2>
+            <span class="badge badge-secondary" id="depts-visited-count">14 / 96</span>
+          </div>
+          <div class="card" style="padding:var(--space-4);">
+            <canvas id="france-map-canvas" width="500" height="380" style="width:100%;max-width:500px;display:block;margin:0 auto;border-radius:var(--radius-lg);"></canvas>
+            <p style="text-align:center;font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-3);">
+              Les départements colorés sont ceux où vous avez fait au moins un check-in
+            </p>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="profile-panel" id="panel-badges" style="display:none;">
+          <div class="panel-subheader">
+            <h2>🏆 Mes badges</h2>
+            <span class="badge badge-primary" id="badges-count">3 / 6 obtenus</span>
+          </div>
+
+          <div class="badges-grid" id="badges-grid">
+            <!-- Rendu par js/badges.js -->
+          </div>
+
+          <div class="panel-subheader" style="margin-top:var(--space-8);">
+            <h2>🏅 Classement Top Contributeurs</h2>
+          </div>
+          <div class="leaderboard" id="leaderboard">
+            <!-- Rendu par js/badges.js -->
+          </div>
+        </div>
+
+        <!-- Mes photos -->
+        <div class="profile-panel" id="panel-photos" style="display:none;">
+          <div class="panel-subheader">
+            <h2>Mes photos</h2>
+            <a href="galerie.html" class="btn btn-primary btn-sm">📸 Ajouter</a>
+          </div>
+          <div class="gallery-masonry" id="profile-photos-grid">
+            <div class="gallery-card">
+              <div class="gallery-photo" style="background:linear-gradient(135deg,#1a0533,#0d1b4b); height:200px;">
+                <span style="font-size:3rem;">🌌</span>
+                <div class="gallery-overlay">
+                  <div class="gallery-info"><h3>Voie Lactée</h3></div>
+                  <div class="gallery-actions"><button class="gallery-like">❤️ 47</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avis reçus -->
+        <div class="profile-panel" id="panel-reviews" style="display:none;">
+          <h2 style="margin-bottom:1.5rem;">Avis reçus</h2>
+          <div class="reviews-list">
+            <div class="review-item card">
+              <div class="card-body">
+                <div class="review-header">
+                  <div class="avatar">M</div>
+                  <div>
+                    <strong>@mariefils</strong>
+                    <p style="color:var(--color-text-muted);font-size:var(--text-sm);">Perséides 2025</p>
+                  </div>
+                  <div class="stars">
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                  </div>
+                </div>
+                <p style="margin-top:1rem; color:var(--color-text-muted);">
+                  "Soirée magnifique ! Organisateur passionné et pédagogue. J'ai appris énormément. Vivement la prochaine !"
+                </p>
+              </div>
+            </div>
+            <div class="review-item card">
+              <div class="card-body">
+                <div class="review-header">
+                  <div class="avatar">T</div>
+                  <div>
+                    <strong>@telescopeur</strong>
+                    <p style="color:var(--color-text-muted);font-size:var(--text-sm);">Nuit Voie Lactée — Cévennes</p>
+                  </div>
+                  <div class="stars">
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star">★</span>
+                  </div>
+                </div>
+                <p style="margin-top:1rem; color:var(--color-text-muted);">
+                  "Très bonne organisation, lieu idéal. La météo n'était pas parfaite mais on a quand même eu de belles vues !"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paramètres -->
+        <div class="profile-panel" id="panel-settings" style="display:none;">
+          <!-- Modifier le profil -->
+          <div class="card">
+            <div class="card-header"><h2>Modifier le profil</h2></div>
+            <div class="card-body">
+              <form id="form-settings">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-pseudo">Pseudo</label>
+                    <input type="text" class="form-input" id="settings-pseudo" placeholder="stargazer42" required>
+                    <span class="form-hint">Lettres, chiffres, tirets et underscores uniquement</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-email">Email</label>
+                    <input type="email" class="form-input" id="settings-email" disabled>
+                    <span class="form-hint">L'email ne peut pas être modifié</span>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-region">Région</label>
+                    <select class="form-select" id="settings-region">
+                      <option value="">Sélectionnez...</option>
+                      <option value="Île-de-France">Île-de-France</option>
+                      <option value="Auvergne-Rhône-Alpes">Auvergne-Rhône-Alpes</option>
+                      <option value="Bretagne">Bretagne</option>
+                      <option value="Occitanie">Occitanie</option>
+                      <option value="Provence-Alpes-Côte d'Azur">Provence-Alpes-Côte d'Azur</option>
+                      <option value="Normandie">Normandie</option>
+                      <option value="Nouvelle-Aquitaine">Nouvelle-Aquitaine</option>
+                      <option value="Grand Est">Grand Est</option>
+                      <option value="Hauts-de-France">Hauts-de-France</option>
+                      <option value="Centre-Val de Loire">Centre-Val de Loire</option>
+                      <option value="Bourgogne-Franche-Comté">Bourgogne-Franche-Comté</option>
+                      <option value="Pays de la Loire">Pays de la Loire</option>
+                      <option value="Corse">Corse</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-level">Niveau</label>
+                    <select class="form-select" id="settings-level">
+                      <option value="beginner">Débutant</option>
+                      <option value="intermediate">Intermédiaire</option>
+                      <option value="expert">Expert</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="settings-equipment">Matériel</label>
+                  <input type="text" class="form-input" id="settings-equipment" placeholder="Ex: Dobson 200mm, APN Canon EOS...">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="settings-bio">Bio</label>
+                  <textarea class="form-input" id="settings-bio" rows="3" placeholder="Parlez de vous et de votre passion..." style="resize:vertical;"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Notifications</label>
+                  <label class="checkbox-label" style="margin-top:.5rem;">
+                    <input type="checkbox" id="notif-spot-region" checked>
+                    <span>Alerte nouveaux spots dans ma région</span>
+                  </label>
+                  <label class="checkbox-label" style="margin-top:.5rem;">
+                    <input type="checkbox" id="notif-clear-sky" checked>
+                    <span>Alerte ciel dégagé sur mes spots favoris</span>
+                  </label>
+                  <label class="checkbox-label" style="margin-top:.5rem;">
+                    <input type="checkbox" id="notif-review" checked>
+                    <span>Notification avis reçus sur mes spots</span>
+                  </label>
+                  <label class="checkbox-label" style="margin-top:.5rem;">
+                    <input type="checkbox" id="notif-social" checked>
+                    <span>Activité sociale (nouveaux abonnés, mentions)</span>
+                  </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Sauvegarder</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Changer le mot de passe -->
+          <div class="card" style="margin-top:var(--space-6);">
+            <div class="card-header"><h2>Changer le mot de passe</h2></div>
+            <div class="card-body">
+              <form id="form-password">
+                <div class="form-group">
+                  <label class="form-label" for="current-password">Mot de passe actuel</label>
+                  <input type="password" class="form-input" id="current-password" placeholder="••••••••" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="new-password">Nouveau mot de passe</label>
+                    <input type="password" class="form-input" id="new-password" placeholder="Minimum 8 caractères" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="confirm-password">Confirmer</label>
+                    <input type="password" class="form-input" id="confirm-password" placeholder="Confirmez le mot de passe" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-outline">Changer le mot de passe</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom"><p>© 2025 AstroNuit</p></div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/profil.page.js"></script>
+</body>
+</html>

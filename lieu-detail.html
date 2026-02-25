@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AstroNuit — Fiche détaillée d'un spot d'observation du ciel nocturne.">
+  <title>Fiche lieu — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/lieu-detail.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link active"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <!-- Fil d'Ariane -->
+      <div class="breadcrumb-bar">
+        <div class="container">
+          <div class="breadcrumb">
+            <a href="lieux.html" class="breadcrumb-link">← Spots</a>
+            <span class="breadcrumb-sep">/</span>
+            <span id="breadcrumb-name">Chargement…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== HERO ===== -->
+      <div class="lieu-hero" id="lieu-hero">
+        <div class="lieu-hero-bg" id="lieu-hero-bg"></div>
+        <div class="container">
+          <div class="lieu-hero-content">
+            <div class="lieu-hero-badges" id="lieu-hero-badges">
+              <!-- Type + Bortle rendus par JS -->
+            </div>
+            <h1 class="lieu-hero-title" id="lieu-hero-title">Chargement…</h1>
+            <p class="lieu-hero-location" id="lieu-hero-location"></p>
+            <div class="lieu-hero-actions">
+              <button class="btn btn-accent btn-lg" id="btn-checkin">✔ J'y suis allé</button>
+              <button class="btn btn-outline btn-sm" id="btn-fav">♡ Favoris</button>
+              <button class="btn btn-ghost btn-sm" id="btn-share">🔗 Partager</button>
+              <button class="btn btn-ghost btn-sm" id="btn-report" style="color:var(--color-text-dim);">⚑ Signaler</button>
+            </div>
+          </div>
+        </div>
+        <div class="lieu-hero-overlay"></div>
+      </div>
+
+      <div class="container">
+        <div class="lieu-layout">
+
+          <!-- ===== COLONNE PRINCIPALE ===== -->
+          <div class="lieu-main">
+
+            <!-- Conditions ce soir -->
+            <section class="card lieu-section">
+              <div class="card-header">
+                <h2>🌙 Conditions ce soir</h2>
+                <span id="conditions-update" class="badge badge-secondary" style="font-size:.65rem;">En direct</span>
+              </div>
+              <div class="card-body">
+                <div class="conditions-grid" id="conditions-grid">
+                  <div class="condition-item">
+                    <div class="condition-icon">⛅</div>
+                    <div class="condition-label">Météo</div>
+                    <div class="condition-value" id="cond-weather">--</div>
+                    <div class="condition-sub" id="cond-clouds">-- nuages</div>
+                  </div>
+                  <div class="condition-item">
+                    <div class="condition-icon">🌙</div>
+                    <div class="condition-label">Lune</div>
+                    <div class="condition-value" id="cond-moon">--</div>
+                    <div class="condition-sub" id="cond-moon-set">Coucher --</div>
+                  </div>
+                  <div class="condition-item">
+                    <div class="condition-icon">🌑</div>
+                    <div class="condition-label">Nuit noire</div>
+                    <div class="condition-value" id="cond-darknight">--</div>
+                    <div class="condition-sub" id="cond-darknight-end">Fin --</div>
+                  </div>
+                  <div class="condition-item">
+                    <div class="condition-icon">💨</div>
+                    <div class="condition-label">Vent</div>
+                    <div class="condition-value" id="cond-wind">--</div>
+                    <div class="condition-sub" id="cond-humidity">Humidité --</div>
+                  </div>
+                  <div class="condition-item">
+                    <div class="condition-icon">🔭</div>
+                    <div class="condition-label">Seeing estimé</div>
+                    <div class="condition-value" id="cond-seeing">--</div>
+                    <div class="condition-sub" id="cond-seeing-sub">--</div>
+                  </div>
+                  <div class="condition-item conditions-global" id="cond-global">
+                    <div class="condition-icon" id="cond-global-icon">--</div>
+                    <div class="condition-label">Conditions globales</div>
+                    <div class="condition-value" id="cond-global-val">--</div>
+                    <div class="condition-sub">Pour ce soir</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Infos pratiques -->
+            <section class="card lieu-section">
+              <div class="card-header"><h2>ℹ️ Infos pratiques</h2></div>
+              <div class="card-body">
+                <div class="infos-grid" id="infos-grid">
+                  <!-- Rendu par JS -->
+                </div>
+                <div class="gps-row">
+                  <div class="gps-coords" id="gps-coords">GPS : --</div>
+                  <a class="btn btn-outline btn-sm" id="btn-itinerary" href="#" target="_blank">
+                    🗺️ Itinéraire Google Maps
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <!-- Mini carte -->
+            <section class="card lieu-section">
+              <div class="card-header"><h2>📍 Localisation</h2></div>
+              <div class="card-body" style="padding:0;">
+                <div id="lieu-map" style="height:280px; border-radius:0 0 var(--radius-xl) var(--radius-xl);"></div>
+              </div>
+            </section>
+
+            <!-- Galerie communautaire -->
+            <section class="card lieu-section">
+              <div class="card-header">
+                <h2>📸 Galerie communautaire</h2>
+                <button class="btn btn-accent btn-sm" id="btn-upload-photo">+ Ajouter une photo</button>
+              </div>
+              <div class="card-body">
+                <div class="lieu-gallery-grid" id="lieu-gallery">
+                  <div class="lieu-gallery-placeholder">
+                    <span>🌌</span>
+                    <span>Aucune photo pour ce lieu. Soyez le premier !</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Avis -->
+            <section class="card lieu-section">
+              <div class="card-header">
+                <h2>💬 Avis de la communauté</h2>
+                <div class="lieu-votes-summary" id="votes-summary"></div>
+              </div>
+              <div class="card-body">
+                <!-- Formulaire avis -->
+                <div class="avis-form" id="avis-form">
+                  <div class="avis-form-header">
+                    <div class="avatar" id="avis-user-avatar">?</div>
+                    <div style="flex:1;">
+                      <textarea class="form-textarea" id="avis-text" rows="3"
+                        placeholder="Partagez votre expérience sur ce spot…"></textarea>
+                    </div>
+                  </div>
+                  <div class="avis-form-actions">
+                    <div class="avis-vote-btns">
+                      <button class="btn btn-ghost btn-sm avis-vote" data-vote="up" id="vote-up">👍 Recommander</button>
+                      <button class="btn btn-ghost btn-sm avis-vote" data-vote="down" id="vote-down">👎 Déconseiller</button>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btn-submit-avis">Publier l'avis</button>
+                  </div>
+                </div>
+
+                <!-- Liste avis -->
+                <div class="avis-list" id="avis-list">
+                  <!-- Rendu par JS -->
+                </div>
+              </div>
+            </section>
+
+            <!-- Événements liés -->
+            <section class="card lieu-section">
+              <div class="card-header">
+                <h2>📅 Sorties organisées ici</h2>
+                <a href="#" class="btn btn-accent btn-sm" id="btn-create-event-here">+ Organiser une sortie</a>
+              </div>
+              <div class="card-body">
+                <div id="lieu-events-list">
+                  <!-- Rendu par JS -->
+                </div>
+              </div>
+            </section>
+
+          </div><!-- /.lieu-main -->
+
+          <!-- ===== SIDEBAR ===== -->
+          <aside class="lieu-sidebar">
+
+            <!-- Stats rapides -->
+            <div class="card">
+              <div class="card-body">
+                <div class="sidebar-stats">
+                  <div class="sidebar-stat">
+                    <div class="sidebar-stat-value" id="stat-visits">--</div>
+                    <div class="sidebar-stat-label">Visites</div>
+                  </div>
+                  <div class="sidebar-stat">
+                    <div class="sidebar-stat-value" id="stat-thumbsup">--</div>
+                    <div class="sidebar-stat-label">👍 Recommandé</div>
+                  </div>
+                  <div class="sidebar-stat">
+                    <div class="sidebar-stat-value" id="stat-avis">--</div>
+                    <div class="sidebar-stat-label">Avis</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Check-ins récents -->
+            <div class="card">
+              <div class="card-header"><h3>👣 Derniers check-ins</h3></div>
+              <div class="card-body">
+                <div class="checkins-list" id="checkins-list">
+                  <!-- Rendu par JS -->
+                </div>
+                <button class="btn btn-accent btn-sm" style="width:100%;margin-top:1rem;" id="btn-checkin-sidebar">
+                  ✔ J'y suis allé !
+                </button>
+              </div>
+            </div>
+
+            <!-- Contributeur -->
+            <div class="card">
+              <div class="card-header"><h3>✦ Ajouté par</h3></div>
+              <div class="card-body">
+                <div class="contributor-mini" id="added-by">
+                  <!-- Rendu par JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Spots proches -->
+            <div class="card">
+              <div class="card-header"><h3>📍 Spots proches</h3></div>
+              <div class="card-body">
+                <div class="nearby-list" id="nearby-list">
+                  <!-- Rendu par JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Ajouter aux collections -->
+            <div class="card">
+              <div class="card-header"><h3>⭐ Collections</h3></div>
+              <div class="card-body">
+                <div class="collections-actions" id="collection-actions">
+                  <button class="btn btn-outline btn-sm" style="width:100%;" id="btn-add-to-collection">
+                    + Ajouter à une collection
+                  </button>
+                  <a href="collections.html" class="btn btn-ghost btn-sm" style="width:100%;margin-top:.5rem;">
+                    Voir mes collections
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </aside><!-- /.lieu-sidebar -->
+        </div><!-- /.lieu-layout -->
+      </div><!-- /.container -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-brand">Astro<span>Nuit</span></div>
+            <p class="footer-desc">La carte collaborative des spots d'observation nocturne en France.</p>
+          </div>
+          <div>
+            <p class="footer-title">Spots</p>
+            <ul class="footer-links">
+              <li><a href="lieux.html" class="footer-link">Tous les spots</a></li>
+              <li><a href="ajouter-lieu.html" class="footer-link">Ajouter un spot</a></li>
+              <li><a href="collections.html" class="footer-link">Collections</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="footer-title">Communauté</p>
+            <ul class="footer-links">
+              <li><a href="evenements.html" class="footer-link">Sorties</a></li>
+              <li><a href="galerie.html" class="footer-link">Galerie</a></li>
+              <li><a href="connexion.html" class="footer-link">S'inscrire</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="footer-title">Navigation</p>
+            <ul class="footer-links">
+              <li><a href="ciel-du-soir.html" class="footer-link">Ciel du soir</a></li>
+              <li><a href="carte.html" class="footer-link">Carte</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit — Fait avec ✦ pour les passionnés du ciel</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Modal check-in -->
+  <div class="modal-overlay" id="modal-checkin" style="display:none;">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-header">
+        <h3>✔ Enregistrer ma visite</h3>
+        <button class="modal-close" id="modal-checkin-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--color-text-muted);margin-bottom:1rem;">
+          Confirmez votre visite sur ce spot pour enrichir la communauté !
+        </p>
+        <div class="form-group">
+          <label class="form-label">Date de visite</label>
+          <input type="date" class="form-input" id="checkin-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note rapide (optionnel)</label>
+          <input type="text" class="form-input" id="checkin-note" placeholder="Ex: Vue parfaite, lune absente…">
+        </div>
+        <button class="btn btn-accent" style="width:100%;" id="btn-confirm-checkin">
+          ✔ Confirmer ma visite
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal signalement -->
+  <div class="modal-overlay" id="modal-report" style="display:none;">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-header">
+        <h3>⚑ Signaler ce lieu</h3>
+        <button class="modal-close" id="modal-report-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Motif du signalement</label>
+          <select class="form-select" id="report-reason">
+            <option value="">Choisir…</option>
+            <option value="access">Accès privé / interdit</option>
+            <option value="wrong_location">Coordonnées incorrectes</option>
+            <option value="closed">Accès fermé / détruit</option>
+            <option value="spam">Spam / doublon</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Détails</label>
+          <textarea class="form-textarea" id="report-details" rows="3" placeholder="Précisez le problème…"></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;" id="btn-confirm-report">Envoyer le signalement</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+  <script src="js/stars.js"></script>
+  <script src="js/astronomy.js"></script>
+  <script type="module" src="js/pages/lieu-detail.page.js"></script>
+</body>
+</html>

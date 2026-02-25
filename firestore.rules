@@ -1,0 +1,289 @@
+// AstroNuit — Règles de sécurité Firestore
+// Version : 2.0 — Phase 1
+// Région : europe-west1
+//
+// Principes :
+// - Lecture publique pour lieux, events, constellations, media (contenu communautaire)
+// - Écriture toujours authentifiée + email vérifié + non suspendu/banni
+// - Modifications sensibles (score, role, badges) réservées aux Cloud Functions (service account)
+// - Les admins peuvent tout lire et modifier via l'UID admin listé
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    // Utilisateur authentifié avec email vérifié
+    function isVerified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    // Utilisateur authentifié (sans exiger email vérifié — pour lecture seule)
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    // Lit le doc users/{uid} de l'appelant (depuis Firestore, pas le token)
+    function callerData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Vérifie que l'utilisateur n'est ni banni ni suspendu
+    function isActive() {
+      return isVerified() &&
+             !callerData().moderation.banned &&
+             !callerData().moderation.suspended;
+    }
+
+    // Vérifie le rôle minimum requis
+    function hasRole(minRole) {
+      let roles = ['member', 'verified_member', 'constellation_leader', 'regional_moderator', 'admin'];
+      let userRole = callerData().role;
+      return isActive() && roles.indexOf(userRole) >= roles.indexOf(minRole);
+    }
+
+    function isAdmin() {
+      return isAuthed() && callerData().role == 'admin';
+    }
+
+    function isModerator() {
+      return isAuthed() && callerData().role in ['regional_moderator', 'admin'];
+    }
+
+    // Vérifie que l'appelant est le propriétaire du document
+    function isOwner(userId) {
+      return isAuthed() && request.auth.uid == userId;
+    }
+
+    // Anti-spam : empêche les modifications de champs sensibles par le client
+    function noSensitiveFieldsModified() {
+      return !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['score', 'badges', 'role', 'moderation', 'stats', 'gdprConsentAt']);
+    }
+
+    // ── Collection : users ────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Lecture publique du profil (pseudo, région, badges — pas email ni modération)
+      allow read: if true;
+
+      // Création : réservée à Cloud Function onUserCreate (service account)
+      allow create: if false;
+
+      // Mise à jour profil : uniquement par le propriétaire, pas de champs sensibles
+      allow update: if isOwner(userId) &&
+                       isActive() &&
+                       noSensitiveFieldsModified();
+
+      // Suppression : admin uniquement (le droit à l'oubli passe par onUserDelete)
+      allow delete: if isAdmin();
+    }
+
+    // ── Collection : lieux ────────────────────────────────────────────────────
+    match /lieux/{lieuId} {
+      // Lecture publique
+      allow read: if true;
+
+      // Création : membres actifs vérifiés
+      allow create: if isActive() &&
+                       request.resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['name', 'lat', 'lng', 'bortle', 'createdBy', 'createdAt']) &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() >= 3 &&
+                       request.resource.data.name.size() <= 100 &&
+                       request.resource.data.lat is number &&
+                       request.resource.data.lng is number &&
+                       request.resource.data.bortle is int &&
+                       request.resource.data.bortle >= 1 &&
+                       request.resource.data.bortle <= 9;
+
+      // Mise à jour : auteur ou modérateur (pas le reportCount/flagged côté client)
+      allow update: if (isOwner(resource.data.createdBy) && isActive() &&
+                        !request.resource.data.diff(resource.data).affectedKeys()
+                          .hasAny(['reportCount', 'flagged', 'createdBy', 'createdAt']))
+                    || isModerator();
+
+      // Suppression : auteur ou admin
+      allow delete: if isOwner(resource.data.createdBy) || isAdmin();
+
+      // ── Sous-collection : avis ──────────────────────────────────────────────
+      match /avis/{avisId} {
+        allow read: if true;
+        allow create: if isActive() &&
+                         request.resource.data.userId == request.auth.uid &&
+                         request.resource.data.text.size() <= 2000;
+        allow update: if isOwner(resource.data.userId) && isActive();
+        allow delete: if isOwner(resource.data.userId) || isModerator();
+      }
+
+      // ── Sous-collection : checkins ──────────────────────────────────────────
+      match /checkins/{checkinId} {
+        allow read: if true;
+        allow create: if isActive() && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if isOwner(resource.data.userId) || isAdmin();
+      }
+
+      // ── Sous-collection : reports (signalements) ────────────────────────────
+      match /reports/{reportId} {
+        allow read: if isModerator();
+        allow create: if isAuthed() && request.resource.data.reportedBy == request.auth.uid;
+        allow update: if isModerator();
+        allow delete: if isAdmin();
+      }
+
+      // ── Sous-collection : photos ────────────────────────────────────────────
+      match /photos/{photoId} {
+        allow read: if true;
+        allow create: if isActive() && request.resource.data.userId == request.auth.uid;
+        allow delete: if isOwner(resource.data.userId) || isModerator();
+      }
+    }
+
+    // ── Collection : events ───────────────────────────────────────────────────
+    match /events/{eventId} {
+      allow read: if true;
+
+      // Création : membres vérifiés avec rôle verified_member ou supérieur
+      allow create: if hasRole('verified_member') &&
+                       request.resource.data.organizerId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['title', 'date', 'organizerId', 'createdAt']) &&
+                       request.resource.data.title.size() >= 5 &&
+                       request.resource.data.title.size() <= 200 &&
+                       request.resource.data.maxParticipants is int &&
+                       request.resource.data.maxParticipants >= 2 &&
+                       request.resource.data.maxParticipants <= 500;
+
+      // Mise à jour : organisateur ou admin
+      allow update: if (isOwner(resource.data.organizerId) && isActive() &&
+                        !request.resource.data.diff(resource.data).affectedKeys()
+                          .hasAny(['organizerId', 'createdAt', 'reportCount']))
+                    || isAdmin();
+
+      allow delete: if isOwner(resource.data.organizerId) || isAdmin();
+
+      // ── Sous-collection : comments ──────────────────────────────────────────
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isActive() &&
+                         request.resource.data.userId == request.auth.uid &&
+                         request.resource.data.text.size() >= 1 &&
+                         request.resource.data.text.size() <= 2000;
+        allow update: if isOwner(resource.data.userId) && isActive();
+        allow delete: if isOwner(resource.data.userId) || isModerator();
+      }
+
+      // ── Sous-collection : ratings ───────────────────────────────────────────
+      match /ratings/{ratingId} {
+        allow read: if true;
+        allow create: if isActive() && request.resource.data.userId == request.auth.uid;
+        allow update: if isOwner(resource.data.userId) && isActive();
+        allow delete: if isOwner(resource.data.userId) || isAdmin();
+      }
+    }
+
+    // ── Collection : constellations ───────────────────────────────────────────
+    match /constellations/{constId} {
+      allow read: if true;
+
+      // Création : vérifiée par Cloud Function eligibilityCheck puis client écrit
+      // Cloud Function vérifie côté serveur → ici on vérifie que les champs requis sont présents
+      allow create: if isActive() &&
+                       request.resource.data.leaderId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['name', 'leaderId', 'region', 'createdAt']) &&
+                       request.resource.data.name.size() >= 3 &&
+                       request.resource.data.name.size() <= 50;
+
+      // Mise à jour : leader ou admin
+      allow update: if (isOwner(resource.data.leaderId) && isActive() &&
+                        !request.resource.data.diff(resource.data).affectedKeys()
+                          .hasAny(['leaderId', 'createdAt']))
+                    || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // ── Collection : media ────────────────────────────────────────────────────
+    match /media/{mediaId} {
+      allow read: if true;
+
+      allow create: if isActive() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['url', 'userId', 'createdAt']) &&
+                       request.resource.data.title.size() <= 200;
+
+      allow update: if isOwner(resource.data.userId) && isActive() &&
+                       !request.resource.data.diff(resource.data).affectedKeys()
+                         .hasAny(['userId', 'createdAt', 'likes', 'dislikes', 'reportCount']);
+
+      allow delete: if isOwner(resource.data.userId) || isModerator();
+
+      // ── Réactions ──────────────────────────────────────────────────────────
+      match /reactions/{reactionId} {
+        allow read: if true;
+        // L'ID du document doit être l'UID de l'utilisateur (1 réaction/user)
+        allow create, update: if isActive() && reactionId == request.auth.uid;
+        allow delete: if isOwner(reactionId) || isAdmin();
+      }
+
+      // ── Commentaires ───────────────────────────────────────────────────────
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isActive() &&
+                         request.resource.data.userId == request.auth.uid &&
+                         request.resource.data.text.size() <= 2000;
+        allow update: if isOwner(resource.data.userId) && isActive();
+        allow delete: if isOwner(resource.data.userId) || isModerator();
+      }
+    }
+
+    // ── Collection : reports (globale) ────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read: if isModerator();
+      allow create: if isAuthed() &&
+                       request.resource.data.reportedBy == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['targetType', 'targetId', 'reportedBy', 'category', 'createdAt']) &&
+                       request.resource.data.category in ['spam', 'abuse', 'fake_info', 'harassment', 'dangerous', 'private_access', 'duplicate'];
+      allow update: if isModerator();
+      allow delete: if isAdmin();
+    }
+
+    // ── Collection : scores ───────────────────────────────────────────────────
+    match /scores/{scoreId} {
+      allow read: if true;
+      // Écriture réservée aux Cloud Functions (service account) — pas de write client
+      allow write: if false;
+    }
+
+    // ── Collection : astronomical_events ─────────────────────────────────────
+    match /astronomical_events/{eventId} {
+      allow read: if true;
+      // Modification admin uniquement (import script + CRON annuel)
+      allow write: if isAdmin();
+    }
+
+    // ── Caches météo/planètes (lecture publique, écriture Cloud Functions) ────
+    match /cache_weather/{cacheId} {
+      allow read: if true;
+      allow write: if false; // Cloud Functions service account uniquement
+    }
+
+    match /cache_planets/{cacheId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ── Logs admin (lecture/écriture admin uniquement) ────────────────────────
+    match /admin_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /admin_notifications/{notifId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Tout le reste : accès refusé ──────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - var(--nav-height));
+    }
+    .admin-sidebar {
+      background: var(--color-bg-card);
+      border-right: 1px solid var(--color-border-subtle);
+      padding: var(--space-6);
+    }
+    .admin-nav { display: flex; flex-direction: column; gap: var(--space-1); }
+    .admin-nav-link {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      color: var(--color-text-muted);
+      font-size: var(--text-sm); font-weight: 500;
+      cursor: pointer; transition: all var(--transition-fast);
+    }
+    .admin-nav-link:hover, .admin-nav-link.active {
+      background: rgba(108,62,184,.15); color: var(--color-primary-light);
+    }
+    .admin-main { padding: var(--space-8); }
+    .admin-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: var(--space-4); margin-bottom: var(--space-8); }
+    .admin-stat-card .card-body { text-align: center; }
+    .admin-stat-number { font-family: var(--font-heading); font-size: var(--text-3xl); font-weight: 900; color: var(--color-star); }
+    .admin-stat-label { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .admin-section { margin-bottom: var(--space-8); }
+    .admin-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+    .member-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
+    .member-info { flex: 1; }
+    .member-name { font-weight: 600; }
+    .member-meta { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .member-actions { display: flex; gap: var(--space-2); }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+          <span class="badge badge-error" style="font-size:.6rem; margin-left:.5rem;">ADMIN</span>
+        </a>
+        <div class="navbar-actions">
+          <a href="index.html" class="btn btn-ghost btn-sm">← Site public</a>
+          <div class="avatar">A</div>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="admin-layout">
+        <!-- Sidebar admin -->
+        <div class="admin-sidebar">
+          <p style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:.1em; color:var(--color-text-dim); margin-bottom:1rem;">Administration</p>
+          <nav class="admin-nav">
+            <div class="admin-nav-link active" data-section="dashboard">📊 Tableau de bord</div>
+            <div class="admin-nav-link" data-section="members">👥 Membres en attente</div>
+            <div class="admin-nav-link" data-section="reports">⚑ Signalements <span style="background:rgba(248,113,113,.25);color:#f87171;padding:1px 6px;border-radius:999px;font-size:.7rem;margin-left:4px;">3</span></div>
+            <div class="admin-nav-link" data-section="moderators">🛡️ Modérateurs régionaux</div>
+            <div class="admin-nav-link" data-section="events">📅 Événements</div>
+            <div class="admin-nav-link" data-section="gallery">📸 Galerie (modération)</div>
+            <div class="admin-nav-link" data-section="sites">🗺️ Sites d'observation</div>
+            <div class="admin-nav-link" data-section="notifications">🔔 Notifications</div>
+          </nav>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="admin-main">
+
+          <!-- Dashboard -->
+          <div id="section-dashboard">
+            <h1 style="margin-bottom:2rem;">Tableau de bord</h1>
+
+            <div class="admin-stats">
+              <div class="card admin-stat-card">
+                <div class="card-body">
+                  <div class="admin-stat-number">842</div>
+                  <div class="admin-stat-label">Membres actifs</div>
+                </div>
+              </div>
+              <div class="card admin-stat-card">
+                <div class="card-body">
+                  <div class="admin-stat-number" style="color:var(--color-warning);">7</div>
+                  <div class="admin-stat-label">En attente validation</div>
+                </div>
+              </div>
+              <div class="card admin-stat-card">
+                <div class="card-body">
+                  <div class="admin-stat-number">24</div>
+                  <div class="admin-stat-label">Sorties actives</div>
+                </div>
+              </div>
+              <div class="card admin-stat-card">
+                <div class="card-body">
+                  <div class="admin-stat-number">1,284</div>
+                  <div class="admin-stat-label">Photos publiées</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><h2>Membres en attente de validation</h2></div>
+              <div class="card-body">
+                <div class="member-row">
+                  <div class="avatar">M</div>
+                  <div class="member-info">
+                    <div class="member-name">@mariefils</div>
+                    <div class="member-meta">marie.fils@gmail.com · Bretagne · Débutant · Inscription il y a 2h</div>
+                  </div>
+                  <div class="member-actions">
+                    <button class="btn btn-success btn-sm" style="background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.3);">
+                      ✅ Approuver
+                    </button>
+                    <button class="btn btn-ghost btn-sm">❌ Refuser</button>
+                  </div>
+                </div>
+                <div class="member-row">
+                  <div class="avatar">T</div>
+                  <div class="member-info">
+                    <div class="member-name">@telescopeur75</div>
+                    <div class="member-meta">thomas.r@outlook.fr · Île-de-France · Intermédiaire · Inscription il y a 5h</div>
+                  </div>
+                  <div class="member-actions">
+                    <button class="btn btn-sm" style="background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.3);">
+                      ✅ Approuver
+                    </button>
+                    <button class="btn btn-ghost btn-sm">❌ Refuser</button>
+                  </div>
+                </div>
+                <div class="member-row">
+                  <div class="avatar">J</div>
+                  <div class="member-info">
+                    <div class="member-name">@jupiterobserver</div>
+                    <div class="member-meta">jean.pascal@free.fr · Occitanie · Expert · Inscription hier</div>
+                  </div>
+                  <div class="member-actions">
+                    <button class="btn btn-sm" style="background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.3);">
+                      ✅ Approuver
+                    </button>
+                    <button class="btn btn-ghost btn-sm">❌ Refuser</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:1.5rem;">
+              <div class="card-header">
+                <h2>Envoyer une notification à tous les membres</h2>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Titre</label>
+                  <input type="text" class="form-input" placeholder="Nouvelle sortie dans votre région !">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Message</label>
+                  <textarea class="form-textarea" rows="3" placeholder="Message de notification push..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ciblage</label>
+                  <select class="form-select">
+                    <option>Tous les membres</option>
+                    <option>Région : Bretagne</option>
+                    <option>Région : Occitanie</option>
+                    <option>Région : PACA</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="window.Toast?.success('Notification envoyée !')">
+                  🔔 Envoyer la notification
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signalements -->
+          <div id="section-reports" style="display:none;">
+            <h1 style="margin-bottom:2rem;">⚑ Signalements de spots</h1>
+
+            <div class="admin-stats" style="grid-template-columns:repeat(3,1fr);">
+              <div class="card admin-stat-card">
+                <div class="card-body">
+                  <div class="admin-stat-number" style="color:#f87171;">3</div>
+                  <div class="admin-stat-label">Signalements ouverts</div>
+                </div>
+              </div>
+              <div class="card admin-stat-card">
+                <div class="card-body">
+                  <div class="admin-stat-number" style="color:var(--color-warning);">1</div>
+                  <div class="admin-stat-label">Accès privé signalé</div>
+                </div>
+              </div>
+              <div class="card admin-stat-card">
+                <div class="card-body">
+                  <div class="admin-stat-number">14</div>
+                  <div class="admin-stat-label">Traités ce mois</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><h2>Signalements en attente</h2></div>
+              <div class="card-body">
+                <div class="member-row">
+                  <div style="font-size:1.5rem;">⚑</div>
+                  <div class="member-info">
+                    <div class="member-name">Col du Tourmalet — Coord. incorrectes</div>
+                    <div class="member-meta">Signalé par @jupiterobserver · Il y a 2h · "Les coordonnées sont décalées de 200m vers le sud"</div>
+                  </div>
+                  <div class="member-actions">
+                    <a href="lieu-detail.html?id=l2" class="btn btn-ghost btn-sm" target="_blank">Voir le spot</a>
+                    <button class="btn btn-sm" style="background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.3);" onclick="this.closest('.member-row').style.opacity='.3';this.closest('.member-row').style.pointerEvents='none';Toast.success('Signalement traité');">✅ Traité</button>
+                    <button class="btn btn-ghost btn-sm" onclick="this.closest('.member-row').style.opacity='.3';this.closest('.member-row').style.pointerEvents='none';Toast.info('Signalement ignoré.');">Ignorer</button>
+                  </div>
+                </div>
+                <div class="member-row">
+                  <div style="font-size:1.5rem;">🔒</div>
+                  <div class="member-info">
+                    <div class="member-name">Montagne Sainte-Victoire — Accès privé</div>
+                    <div class="member-meta">Signalé par @ciel_breton · Il y a 1 jour · "Le chemin d'accès traverse maintenant une propriété privée clôturée"</div>
+                  </div>
+                  <div class="member-actions">
+                    <a href="lieu-detail.html?id=l4" class="btn btn-ghost btn-sm" target="_blank">Voir le spot</a>
+                    <button class="btn btn-sm" style="background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.3);" onclick="this.closest('.member-row').style.opacity='.3';this.closest('.member-row').style.pointerEvents='none';Toast.success('Spot marqué comme accès restreint.');">✅ Marquer restreint</button>
+                    <button class="btn btn-ghost btn-sm" onclick="this.closest('.member-row').style.opacity='.3';this.closest('.member-row').style.pointerEvents='none';Toast.info('Signalement ignoré.');">Ignorer</button>
+                  </div>
+                </div>
+                <div class="member-row">
+                  <div style="font-size:1.5rem;">🗑️</div>
+                  <div class="member-info">
+                    <div class="member-name">Forêt de Fontainebleau — Doublon</div>
+                    <div class="member-meta">Signalé par @stargazer42 · Il y a 3 jours · "Spot identique à 'Carrefour du Grand Veneur' ajouté 6 mois avant"</div>
+                  </div>
+                  <div class="member-actions">
+                    <a href="lieu-detail.html?id=l3" class="btn btn-ghost btn-sm" target="_blank">Voir le spot</a>
+                    <button class="btn btn-sm" style="background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);" onclick="this.closest('.member-row').style.opacity='.3';this.closest('.member-row').style.pointerEvents='none';Toast.success('Spot supprimé.');">🗑 Supprimer</button>
+                    <button class="btn btn-ghost btn-sm" onclick="this.closest('.member-row').style.opacity='.3';this.closest('.member-row').style.pointerEvents='none';Toast.info('Signalement ignoré.');">Ignorer</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modérateurs régionaux -->
+          <div id="section-moderators" style="display:none;">
+            <h1 style="margin-bottom:2rem;">🛡️ Modérateurs régionaux</h1>
+
+            <div class="card" style="margin-bottom:1.5rem;">
+              <div class="card-header">
+                <h2>Modérateurs actifs</h2>
+                <button class="btn btn-primary btn-sm" onclick="Toast.info('Formulaire invitation modérateur — en développement')">+ Inviter un modérateur</button>
+              </div>
+              <div class="card-body">
+                <div class="member-row">
+                  <div class="avatar">C</div>
+                  <div class="member-info">
+                    <div class="member-name">@ciel_breton</div>
+                    <div class="member-meta">Bretagne · Pays de la Loire · 14 spots approuvés · 3 signalements traités</div>
+                  </div>
+                  <div class="member-actions">
+                    <span class="badge badge-success" style="font-size:.65rem;">Actif</span>
+                    <button class="btn btn-ghost btn-sm" onclick="Toast.warning('Retirer les droits de modération ?')">Retirer</button>
+                  </div>
+                </div>
+                <div class="member-row">
+                  <div class="avatar">J</div>
+                  <div class="member-info">
+                    <div class="member-name">@jupiterobserver</div>
+                    <div class="member-meta">Occitanie · 22 spots approuvés · 8 signalements traités</div>
+                  </div>
+                  <div class="member-actions">
+                    <span class="badge badge-success" style="font-size:.65rem;">Actif</span>
+                    <button class="btn btn-ghost btn-sm" onclick="Toast.warning('Retirer les droits de modération ?')">Retirer</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><h2>Régions sans modérateur</h2></div>
+              <div class="card-body">
+                <div style="display:flex;flex-wrap:wrap;gap:.75rem;">
+                  ${['Grand Est','Hauts-de-France','Bourgogne-Franche-Comté','Normandie','Centre-Val de Loire','Corse'].map(r =>
+                    `<span class="badge badge-ghost" style="font-size:.8rem;padding:.4rem .8rem;">${r} <button style="background:transparent;border:none;color:var(--color-primary-light);cursor:pointer;margin-left:4px;font-size:.7rem;" onclick="Toast.info('Invitation modérateur pour ${r}')">+ Nommer</button></span>`
+                  ).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/admin.page.js"></script>
+</body>
+</html>

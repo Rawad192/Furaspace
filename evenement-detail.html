@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détail sortie — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/event-detail.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link active"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <!-- Fil d'ariane -->
+        <nav class="breadcrumb">
+          <a href="evenements.html">Sorties</a>
+          <span>›</span>
+          <span id="event-breadcrumb">Perséides 2025</span>
+        </nav>
+
+        <div class="event-detail-layout">
+          <!-- Colonne principale -->
+          <div class="event-detail-main">
+            <!-- Hero événement -->
+            <div class="event-hero card">
+              <div class="event-hero-banner" id="event-banner">
+                <span style="font-size: 5rem;">🌌</span>
+              </div>
+              <div class="card-body">
+                <div class="event-tags" id="event-tags">
+                  <span class="badge badge-primary">Pluie de météorites</span>
+                  <span class="badge badge-accent">Places disponibles</span>
+                </div>
+                <h1 class="event-detail-title" id="event-title">
+                  Perséides 2025 — Alpes-de-Haute-Provence
+                </h1>
+                <div class="event-organizer">
+                  <div class="avatar">A</div>
+                  <div>
+                    <span class="organizer-label">Organisé par</span>
+                    <a href="profil.html" class="organizer-name" id="event-organizer">@astronome_pro</a>
+                  </div>
+                  <div class="stars">
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star filled">★</span>
+                    <span class="star">★</span>
+                  </div>
+                  <span style="color: var(--color-text-muted); font-size: var(--text-sm);">4.2 (12 avis)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card">
+              <div class="card-header"><h2>Description</h2></div>
+              <div class="card-body">
+                <div class="event-description" id="event-description">
+                  <p>Rejoignez-nous pour observer le pic des Perséides 2025 depuis le magnifique Plateau de Valensole, l'un des meilleurs sites d'observation de France avec un indice Bortle de 2.</p>
+                  <p>Les Perséides sont la pluie de météorites la plus spectaculaire de l'année, pouvant atteindre jusqu'à 100 météorites par heure au pic d'activité.</p>
+                  <h3>Programme de la soirée</h3>
+                  <ul>
+                    <li>22h00 — Arrivée et installation</li>
+                    <li>22h30 — Présentation du ciel du soir</li>
+                    <li>23h00 — Début de l'observation, lunaires + planètes</li>
+                    <li>00h00 — Pic prévu des Perséides</li>
+                    <li>02h00 — Fin de la sortie officielle</li>
+                  </ul>
+                  <h3>Matériel recommandé</h3>
+                  <ul>
+                    <li>Chaise longue ou tapis de sol</li>
+                    <li>Vêtements chauds (il fait frais la nuit)</li>
+                    <li>Lampe rouge (pour préserver l'adaptation)</li>
+                    <li>Jumelles (optionnel)</li>
+                    <li>Thermos chaud</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Carte du lieu -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Lieu de rendez-vous</h2>
+              </div>
+              <div class="card-body" style="padding-bottom: 0;">
+                <div class="location-info">
+                  <div class="location-icon">📍</div>
+                  <div>
+                    <strong id="event-location">Plateau de Valensole, 04210 Valensole</strong>
+                    <p style="color: var(--color-text-muted); font-size: var(--text-sm);">Coordonnées GPS : 43.8341° N, 5.9839° E</p>
+                  </div>
+                  <a href="#" class="btn btn-ghost btn-sm" id="btn-navigate">
+                    🧭 Itinéraire
+                  </a>
+                </div>
+                <div id="detail-map" style="height: 300px; border-radius: 0 0 var(--radius-xl) var(--radius-xl); margin-top: 1rem;"></div>
+              </div>
+            </div>
+
+            <!-- Conditions astronomiques -->
+            <div class="card">
+              <div class="card-header"><h2>Conditions d'observation prévues</h2></div>
+              <div class="card-body">
+                <div class="conditions-grid">
+                  <div class="condition-item">
+                    <span class="condition-icon">☁️</span>
+                    <div>
+                      <div class="condition-label">Couverture nuageuse</div>
+                      <div class="condition-value meteo-clear">5% — Excellent</div>
+                    </div>
+                  </div>
+                  <div class="condition-item">
+                    <span class="condition-icon">🌙</span>
+                    <div>
+                      <div class="condition-label">Phase lunaire</div>
+                      <div class="condition-value">Nouvelle Lune (3%)</div>
+                    </div>
+                  </div>
+                  <div class="condition-item">
+                    <span class="condition-icon">💡</span>
+                    <div>
+                      <div class="condition-label">Pollution lumineuse</div>
+                      <div class="condition-value"><span class="bortle-badge bortle-2">Bortle 2</span></div>
+                    </div>
+                  </div>
+                  <div class="condition-item">
+                    <span class="condition-icon">💨</span>
+                    <div>
+                      <div class="condition-label">Vent</div>
+                      <div class="condition-value">8 km/h — Calme</div>
+                    </div>
+                  </div>
+                  <div class="condition-item">
+                    <span class="condition-icon">🌡️</span>
+                    <div>
+                      <div class="condition-label">Température</div>
+                      <div class="condition-value">16°C la nuit</div>
+                    </div>
+                  </div>
+                  <div class="condition-item">
+                    <span class="condition-icon">👁️</span>
+                    <div>
+                      <div class="condition-label">Seeing</div>
+                      <div class="condition-value">3/5 — Bon</div>
+                    </div>
+                  </div>
+                </div>
+                <p style="color: var(--color-text-muted); font-size: var(--text-sm); margin-top: 1rem;">
+                  Météo mise à jour automatiquement via OpenWeatherMap · Dernière MAJ : aujourd'hui 18h00
+                </p>
+              </div>
+            </div>
+
+            <!-- Commentaires -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Discussion</h2>
+              </div>
+              <div class="card-body">
+                <div class="comments-list" id="comments-list">
+                  <div class="comment">
+                    <div class="avatar">M</div>
+                    <div class="comment-body">
+                      <div class="comment-header">
+                        <strong>@mariefils</strong>
+                        <span class="comment-date">Il y a 2 jours</span>
+                      </div>
+                      <p>Est-ce qu'il y a des points d'eau sur place pour la nuit ?</p>
+                    </div>
+                  </div>
+                  <div class="comment comment-reply">
+                    <div class="avatar" style="background: rgba(108,62,184,.3);">A</div>
+                    <div class="comment-body">
+                      <div class="comment-header">
+                        <strong>@astronome_pro</strong>
+                        <span class="badge badge-primary" style="font-size:.6rem;">Organisateur</span>
+                        <span class="comment-date">Il y a 1 jour</span>
+                      </div>
+                      <p>Il y a une aire de pique-nique avec eau à 500m. Je conseille quand même d'apporter de l'eau !</p>
+                    </div>
+                  </div>
+                </div>
+
+                <form class="comment-form" id="comment-form">
+                  <div class="form-group">
+                    <textarea class="form-textarea" id="comment-input"
+                      placeholder="Posez une question ou partagez un commentaire..." rows="3"></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Envoyer</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="event-detail-sidebar">
+            <!-- Inscription -->
+            <div class="card register-card" id="register-card">
+              <div class="card-body">
+                <div class="register-date">
+                  <div class="date-day" id="event-day">12</div>
+                  <div class="date-info">
+                    <div class="date-month" id="event-month">Août 2025</div>
+                    <div class="date-time" id="event-time">22h00 — 02h00</div>
+                  </div>
+                </div>
+
+                <div class="participants-info">
+                  <div class="participants-header">
+                    <span>Participants</span>
+                    <strong id="participants-count">14 / 30</strong>
+                  </div>
+                  <div class="participants-bar">
+                    <div class="participants-fill" id="participants-fill" style="width: 46%;"></div>
+                  </div>
+                  <div class="avatars-group" id="avatars-preview">
+                    <div class="avatar">M</div>
+                    <div class="avatar">T</div>
+                    <div class="avatar">J</div>
+                    <div class="avatar">A</div>
+                    <div class="avatar" style="background:rgba(108,62,184,.3);">+10</div>
+                  </div>
+                </div>
+
+                <button class="btn btn-accent btn-lg" style="width:100%;" id="btn-join">
+                  ✨ S'inscrire à cette sortie
+                </button>
+
+                <p class="register-reminder">
+                  📩 Rappel automatique envoyé la veille avec la météo mise à jour
+                </p>
+
+                <button class="btn btn-ghost btn-sm" style="width:100%;" id="btn-share">
+                  🔗 Partager cette sortie
+                </button>
+              </div>
+            </div>
+
+            <!-- Infos organisateur -->
+            <div class="card organizer-card">
+              <div class="card-body">
+                <h3 style="margin-bottom: 1rem;">L'organisateur</h3>
+                <div class="organizer-profile">
+                  <div class="avatar" style="width:56px;height:56px;font-size:1.3rem;">A</div>
+                  <div>
+                    <div class="organizer-name-big">@astronome_pro</div>
+                    <div class="organizer-level">
+                      <span class="badge badge-primary">Expert</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="organizer-stats">
+                  <div class="org-stat">
+                    <strong>28</strong>
+                    <span>sorties</span>
+                  </div>
+                  <div class="org-stat">
+                    <strong>4.2 ★</strong>
+                    <span>note moy.</span>
+                  </div>
+                  <div class="org-stat">
+                    <strong>PACA</strong>
+                    <span>région</span>
+                  </div>
+                </div>
+                <p class="org-equipment">
+                  🔭 Dobson 250mm, APN Sony A7III, monture EQ6
+                </p>
+                <a href="profil.html" class="btn btn-ghost btn-sm" style="width:100%;">
+                  Voir le profil →
+                </a>
+              </div>
+            </div>
+
+            <!-- Sites proches -->
+            <div class="card">
+              <div class="card-header"><h3>Sites proches</h3></div>
+              <div class="card-body">
+                <div class="nearby-site">
+                  <div>
+                    <strong>Montagne de Lure</strong>
+                    <p>15 km · Bortle 2</p>
+                  </div>
+                  <span class="bortle-badge bortle-2">B2</span>
+                </div>
+                <div class="nearby-site">
+                  <div>
+                    <strong>Col de Vence</strong>
+                    <p>45 km · Bortle 3</p>
+                  </div>
+                  <span class="bortle-badge bortle-3">B3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/evenement-detail.page.js"></script>
+</body>
+</html>

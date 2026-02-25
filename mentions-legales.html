@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentions légales — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .legal-layout {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+    }
+    .legal-toc {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .legal-toc h2 {
+      font-size: var(--text-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      margin-bottom: 1rem;
+    }
+    .legal-toc ol {
+      list-style: decimal;
+      padding-left: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .legal-toc a {
+      color: var(--color-primary-light);
+      font-size: var(--text-sm);
+      text-decoration: none;
+    }
+    .legal-toc a:hover { text-decoration: underline; }
+    .legal-section {
+      margin-bottom: 3rem;
+      scroll-margin-top: calc(var(--nav-height) + 1rem);
+    }
+    .legal-section h2 {
+      font-size: var(--text-xl);
+      color: var(--color-text);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .legal-section h3 {
+      font-size: var(--text-base);
+      color: var(--color-text);
+      margin: 1.5rem 0 0.75rem;
+    }
+    .legal-section p, .legal-section li {
+      color: var(--color-text-muted);
+      line-height: 1.8;
+      font-size: var(--text-sm);
+    }
+    .legal-section ul, .legal-section ol {
+      padding-left: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+    .legal-section ul { list-style: disc; }
+    .legal-section ol { list-style: decimal; }
+    .alert-legal {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0;
+    }
+    .alert-legal p {
+      color: #fca5a5 !important;
+      margin: 0;
+    }
+    .info-box {
+      background: rgba(108, 62, 184, 0.1);
+      border: 1px solid rgba(108, 62, 184, 0.3);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0;
+    }
+    .info-box p {
+      color: var(--color-text-muted) !important;
+      margin: 0;
+    }
+    .legal-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: var(--text-sm);
+    }
+    .legal-table th {
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      border: 1px solid var(--color-border);
+    }
+    .legal-table td {
+      padding: 0.75rem 1rem;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .legal-update {
+      text-align: center;
+      color: var(--color-text-dim);
+      font-size: var(--text-xs);
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <div class="legal-layout">
+          <div class="page-header" style="margin-bottom: 2rem;">
+            <div>
+              <h1 class="page-title">Mentions légales</h1>
+              <p class="page-subtitle">Informations légales et réglementaires — AstroNuit</p>
+            </div>
+          </div>
+
+          <!-- Table des matières -->
+          <div class="legal-toc">
+            <h2>Table des matières</h2>
+            <ol>
+              <li><a href="#editeur">Éditeur du site</a></li>
+              <li><a href="#hebergeur">Hébergeur</a></li>
+              <li><a href="#responsabilite">Limitation de responsabilité</a></li>
+              <li><a href="#contenu">Contenu communautaire</a></li>
+              <li><a href="#propriete">Propriété intellectuelle</a></li>
+              <li><a href="#donnees">Données personnelles (RGPD)</a></li>
+              <li><a href="#cookies">Cookies</a></li>
+              <li><a href="#droits">Droits des utilisateurs</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ol>
+          </div>
+
+          <!-- 1. Éditeur -->
+          <div class="legal-section" id="editeur">
+            <h2>1. Éditeur du site</h2>
+            <p>Le site AstroNuit (accessible à l'adresse <strong>astronuit.fr</strong>) est édité par :</p>
+            <ul>
+              <li><strong>Raison sociale :</strong> AstroNuit (projet communautaire)</li>
+              <li><strong>Statut :</strong> Association loi 1901 en cours de constitution</li>
+              <li><strong>Email de contact :</strong> contact@astronuit.fr</li>
+              <li><strong>Directeur de la publication :</strong> L'équipe fondatrice AstroNuit</li>
+            </ul>
+          </div>
+
+          <!-- 2. Hébergeur -->
+          <div class="legal-section" id="hebergeur">
+            <h2>2. Hébergeur</h2>
+            <p>Le site est hébergé par :</p>
+            <ul>
+              <li><strong>Firebase Hosting</strong> — Google Ireland Limited</li>
+              <li><strong>Adresse :</strong> Gordon House, Barrow Street, Dublin 4, Irlande</li>
+              <li><strong>Services utilisés :</strong> Firebase Hosting (CDN), Firestore (base de données), Firebase Storage (fichiers), Firebase Authentication, Firebase Cloud Functions</li>
+              <li><strong>Région des données :</strong> <code>europe-west1</code> (Belgique) — données hébergées dans l'Union Européenne</li>
+              <li><strong>Certifications :</strong> ISO 27001, SOC 2/3, conformité RGPD (Google Cloud DPA)</li>
+            </ul>
+          </div>
+
+          <!-- 3. Responsabilité -->
+          <div class="legal-section" id="responsabilite">
+            <h2>3. Limitation de responsabilité</h2>
+
+            <div class="alert-legal">
+              <p><strong>AVERTISSEMENT IMPORTANT :</strong> La participation à des sorties d'observation astronomique implique des activités en plein air, de nuit, dans des zones parfois isolées. Ces activités comportent des risques inhérents. Lisez attentivement ce qui suit.</p>
+            </div>
+
+            <h3>3.1 Sorties d'observation et événements</h3>
+            <p>AstroNuit est une plateforme de mise en relation entre passionnés d'astronomie. À ce titre :</p>
+            <ul>
+              <li>AstroNuit <strong>n'organise pas directement</strong> les sorties d'observation publiées sur la plateforme. Celles-ci sont créées et gérées exclusivement par les membres utilisateurs.</li>
+              <li>AstroNuit <strong>décline toute responsabilité</strong> pour tout accident, blessure, agression, vol, dommage corporel ou matériel survenant pendant, avant ou après les sorties d'observation organisées par les membres.</li>
+              <li>Chaque participant est <strong>seul responsable</strong> de sa sécurité personnelle, de son équipement et de son comportement lors des sorties.</li>
+              <li>L'organisateur d'une sortie agit en son nom propre et est seul responsable de l'organisation et du déroulement de l'événement.</li>
+              <li>AstroNuit ne vérifie pas et ne peut garantir l'exactitude des informations publiées par les organisateurs (lieu, conditions météo, accessibilité, équipements).</li>
+            </ul>
+
+            <h3>3.2 Accès aux sites d'observation</h3>
+            <ul>
+              <li>Les informations sur l'accessibilité des sites (statut public/privé, autorisations) sont fournies par les membres et peuvent être inexactes ou périmées.</li>
+              <li>AstroNuit décline toute responsabilité en cas d'intrusion sur propriété privée résultant de l'utilisation de la plateforme.</li>
+              <li>L'utilisateur est tenu de vérifier les droits d'accès avant de se rendre sur un site.</li>
+            </ul>
+
+            <h3>3.3 Informations astronomiques et météorologiques</h3>
+            <ul>
+              <li>Les données météorologiques, éphémérides, et conditions d'observation sont fournies à titre indicatif.</li>
+              <li>AstroNuit ne garantit pas l'exactitude ou la disponibilité de ces données.</li>
+              <li>Aucune décision importante ne devrait reposer exclusivement sur les informations fournies par la plateforme.</li>
+            </ul>
+
+            <h3>3.4 Liens externes</h3>
+            <p>AstroNuit peut contenir des liens vers des sites tiers (Stellarium Web, OpenWeatherMap, etc.). AstroNuit n'exerce aucun contrôle sur ces sites et décline toute responsabilité quant à leur contenu, leur disponibilité ou leurs pratiques en matière de données.</p>
+          </div>
+
+          <!-- 4. Contenu communautaire -->
+          <div class="legal-section" id="contenu">
+            <h2>4. Contenu communautaire</h2>
+            <p>Les contenus publiés par les membres (spots, photos, descriptions, avis, commentaires) n'engagent que leurs auteurs. AstroNuit n'assume aucune responsabilité éditoriale pour ces contenus, sous réserve de son obligation de réaction en qualité d'hébergeur au sens de la loi pour la Confiance dans l'Économie Numérique (LCEN).</p>
+            <p>Conformément à la LCEN, AstroNuit peut supprimer ou désactiver tout contenu manifestement illicite qui lui est signalé. Pour signaler un contenu, utilisez le bouton "Signaler" disponible sur chaque contenu ou contactez-nous à <strong>moderation@astronuit.fr</strong>.</p>
+          </div>
+
+          <!-- 5. Propriété intellectuelle -->
+          <div class="legal-section" id="propriete">
+            <h2>5. Propriété intellectuelle</h2>
+            <p>L'ensemble des éléments du site AstroNuit (design, logo, textes, code source) est protégé par le droit d'auteur. Toute reproduction totale ou partielle est interdite sans autorisation écrite préalable.</p>
+            <p>En publiant des contenus sur AstroNuit, les membres accordent à la plateforme une licence mondiale, non exclusive et gratuite pour afficher, stocker et distribuer ces contenus dans le cadre du fonctionnement de la plateforme.</p>
+            <p>Les membres garantissent détenir les droits sur les contenus qu'ils publient et qu'ils ne violent pas les droits de tiers.</p>
+          </div>
+
+          <!-- 6. Données personnelles -->
+          <div class="legal-section" id="donnees">
+            <h2>6. Données personnelles (RGPD)</h2>
+
+            <div class="info-box">
+              <p>AstroNuit s'engage à protéger vos données personnelles conformément au Règlement Général sur la Protection des Données (RGPD — Règlement UE 2016/679) et à la loi française Informatique et Libertés.</p>
+            </div>
+
+            <h3>6.1 Données collectées</h3>
+            <table class="legal-table">
+              <thead>
+                <tr>
+                  <th>Catégorie</th>
+                  <th>Données</th>
+                  <th>Base légale</th>
+                  <th>Durée</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Compte</td>
+                  <td>Email, pseudo, mot de passe (hashé)</td>
+                  <td>Contrat</td>
+                  <td>Jusqu'à suppression du compte</td>
+                </tr>
+                <tr>
+                  <td>Profil</td>
+                  <td>Région, niveau, équipement, bio, photo</td>
+                  <td>Consentement</td>
+                  <td>Jusqu'à suppression du compte</td>
+                </tr>
+                <tr>
+                  <td>Activité</td>
+                  <td>Spots, événements, photos, commentaires</td>
+                  <td>Contrat</td>
+                  <td>2 ans après dernière activité</td>
+                </tr>
+                <tr>
+                  <td>Localisation</td>
+                  <td>Position GPS (si accordée, non conservée)</td>
+                  <td>Consentement</td>
+                  <td>Session uniquement</td>
+                </tr>
+                <tr>
+                  <td>Notifications</td>
+                  <td>Token FCM pour notifications push</td>
+                  <td>Consentement</td>
+                  <td>Jusqu'à révocation</td>
+                </tr>
+                <tr>
+                  <td>Technique</td>
+                  <td>Logs de connexion, adresse IP (Firebase)</td>
+                  <td>Intérêt légitime (sécurité)</td>
+                  <td>90 jours</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>6.2 Finalités du traitement</h3>
+            <ul>
+              <li>Fourniture du service (création de compte, authentification)</li>
+              <li>Affichage des contenus communautaires</li>
+              <li>Envoi de notifications relatives aux sorties et conditions météo</li>
+              <li>Modération et sécurité de la plateforme</li>
+              <li>Statistiques d'usage anonymisées</li>
+            </ul>
+
+            <h3>6.3 Transferts de données</h3>
+            <p>Les données sont traitées par Google Firebase (Google Ireland Ltd) dans l'UE (<code>europe-west1</code>). Google agit en qualité de sous-traitant et est lié à AstroNuit par un accord de traitement des données conforme au RGPD. Aucune donnée n'est vendue ou transférée à des tiers à des fins commerciales.</p>
+
+            <h3>6.4 Délégué à la Protection des Données (DPO)</h3>
+            <p>Pour toute question relative à la protection de vos données : <strong>dpo@astronuit.fr</strong></p>
+          </div>
+
+          <!-- 7. Cookies -->
+          <div class="legal-section" id="cookies">
+            <h2>7. Cookies</h2>
+            <p>AstroNuit utilise uniquement des <strong>cookies techniques strictement nécessaires</strong> au fonctionnement du service :</p>
+            <table class="legal-table">
+              <thead>
+                <tr><th>Cookie</th><th>Finalité</th><th>Durée</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>firebase:authUser</code></td>
+                  <td>Maintien de la session d'authentification Firebase</td>
+                  <td>Session / 1 an si "Se souvenir de moi"</td>
+                </tr>
+                <tr>
+                  <td><code>localStorage</code> (navigateur)</td>
+                  <td>Préférences UI (vue grille/liste, filtres), cache Firestore hors-ligne</td>
+                  <td>Permanent (nettoyé à la déconnexion)</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>Aucun cookie publicitaire, analytique tiers ou de pistage n'est déposé. Aucun consentement cookie n'est requis.</p>
+          </div>
+
+          <!-- 8. Droits -->
+          <div class="legal-section" id="droits">
+            <h2>8. Droits des utilisateurs</h2>
+            <p>Conformément au RGPD, vous disposez des droits suivants sur vos données personnelles :</p>
+            <ul>
+              <li><strong>Droit d'accès :</strong> obtenir une copie de vos données</li>
+              <li><strong>Droit de rectification :</strong> corriger des données inexactes (accessible depuis votre profil)</li>
+              <li><strong>Droit à l'effacement :</strong> supprimer votre compte et vos données (bouton "Supprimer mon compte" dans les paramètres)</li>
+              <li><strong>Droit à la portabilité :</strong> recevoir vos données dans un format structuré (JSON) — disponible depuis votre profil</li>
+              <li><strong>Droit d'opposition :</strong> vous opposer à certains traitements (notifications)</li>
+              <li><strong>Droit de limitation :</strong> suspendre temporairement un traitement</li>
+            </ul>
+            <p>Pour exercer ces droits, contactez : <strong>dpo@astronuit.fr</strong>. Délai de réponse : 30 jours maximum.</p>
+            <p>En cas de litige non résolu, vous pouvez saisir la <strong>CNIL</strong> (Commission Nationale de l'Informatique et des Libertés) : <a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a></p>
+          </div>
+
+          <!-- 9. Contact -->
+          <div class="legal-section" id="contact">
+            <h2>9. Contact</h2>
+            <ul>
+              <li><strong>Contact général :</strong> contact@astronuit.fr</li>
+              <li><strong>Modération :</strong> moderation@astronuit.fr</li>
+              <li><strong>Protection des données :</strong> dpo@astronuit.fr</li>
+              <li><strong>Signalement urgence :</strong> abuse@astronuit.fr</li>
+            </ul>
+          </div>
+
+          <p class="legal-update">Mentions légales mises à jour le 1er janvier 2025 — AstroNuit</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit · <a href="mentions-legales.html">Mentions légales</a> · <a href="charte.html">Charte</a></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/static.page.js"></script>
+</body>
+</html>

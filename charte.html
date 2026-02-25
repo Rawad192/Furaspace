@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charte communautaire — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .legal-layout {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+    }
+    .charter-intro {
+      background: linear-gradient(135deg, rgba(108,62,184,0.15), rgba(16,185,129,0.08));
+      border: 1px solid rgba(108,62,184,0.3);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+    .charter-intro-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .charter-intro p { color: var(--color-text-muted); line-height: 1.8; }
+    .rule-section {
+      margin-bottom: 2.5rem;
+    }
+    .rule-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .rule-section-icon {
+      font-size: 1.5rem;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-surface-2);
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+    }
+    .rule-section h2 {
+      font-size: var(--text-lg);
+      color: var(--color-text);
+    }
+    .rule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .rule-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      transition: border-color 0.2s;
+    }
+    .rule-item:hover { border-color: var(--color-border-hover); }
+    .rule-item.forbidden {
+      border-left: 3px solid #ef4444;
+    }
+    .rule-item.required {
+      border-left: 3px solid #10b981;
+    }
+    .rule-marker {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .rule-content p {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      line-height: 1.6;
+    }
+    .rule-content strong {
+      color: var(--color-text);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .moderation-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .moderation-table th {
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: var(--text-sm);
+      border: 1px solid var(--color-border);
+    }
+    .moderation-table td {
+      padding: 0.75rem 1rem;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .severity-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: var(--text-xs);
+      font-weight: 600;
+    }
+    .severity-low { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .severity-med { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    .severity-high { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .appeal-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .appeal-card h3 {
+      font-size: var(--text-base);
+      margin-bottom: 0.75rem;
+    }
+    .appeal-card p {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      line-height: 1.7;
+    }
+    .consent-section {
+      background: linear-gradient(135deg, rgba(108,62,184,0.1), rgba(16,185,129,0.05));
+      border: 1px solid rgba(108,62,184,0.25);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-top: 3rem;
+      text-align: center;
+    }
+    .consent-section h2 {
+      font-size: var(--text-xl);
+      margin-bottom: 1rem;
+    }
+    .consent-section p {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+    .legal-section {
+      margin-bottom: 2.5rem;
+      scroll-margin-top: calc(var(--nav-height) + 1rem);
+    }
+    .legal-section h2 {
+      font-size: var(--text-xl);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .legal-section p, .legal-section li {
+      color: var(--color-text-muted);
+      line-height: 1.8;
+      font-size: var(--text-sm);
+    }
+    .legal-update {
+      text-align: center;
+      color: var(--color-text-dim);
+      font-size: var(--text-xs);
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <div class="legal-layout">
+          <div class="page-header" style="margin-bottom: 2rem;">
+            <div>
+              <h1 class="page-title">Charte communautaire</h1>
+              <p class="page-subtitle">Les règles qui font d'AstroNuit une communauté saine et bienveillante</p>
+            </div>
+          </div>
+
+          <!-- Introduction -->
+          <div class="charter-intro">
+            <div class="charter-intro-icon">✦</div>
+            <p>AstroNuit réunit des passionnés du ciel nocturne : débutants curieux, photographes aguerris, astronomes amateurs. Notre communauté repose sur le <strong>respect mutuel</strong>, le <strong>partage sincère</strong> et la <strong>passion commune</strong> de l'astronomie. Cette charte définit les règles qui permettent à chacun de contribuer et d'évoluer dans un espace sûr.</p>
+            <p style="margin-top: 0.75rem;">L'acceptation de cette charte est obligatoire à l'inscription et conditionne l'accès au service.</p>
+          </div>
+
+          <!-- Règle 1 : Respect -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-icon">🤝</div>
+              <h2>1. Respect et bienveillance</h2>
+            </div>
+            <div class="rule-list">
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Adoptez un langage respectueux en toutes circonstances</strong>
+                  <p>Que ce soit dans les commentaires, les messages, les descriptions de sorties ou les avis sur les spots, utilisez un langage courtois. La passion pour l'astronomie se partage mieux dans la bienveillance.</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Insultes et attaques personnelles strictement interdites</strong>
+                  <p>Tout propos insultant, dégradant ou humiliant visant un membre ou l'équipe d'AstroNuit est interdit, quel que soit le contexte ou la plateforme (commentaires, messages privés, sorties).</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Harcèlement sous toutes ses formes est prohibé</strong>
+                  <p>Le harcèlement inclut : contacts répétés non désirés, intimidation, dénigrement systématique, outing (révélation de données personnelles), chasse aux membres ("brigading"). Toute forme de harcèlement entraîne une suspension immédiate.</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Discrimination et propos haineux prohibés</strong>
+                  <p>Les propos discriminatoires basés sur l'origine, le genre, l'orientation sexuelle, la religion, le handicap ou tout autre critère sont strictement interdits et passibles de ban immédiat.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Règle 2 : Contenu -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-icon">📝</div>
+              <h2>2. Qualité et authenticité du contenu</h2>
+            </div>
+            <div class="rule-list">
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Publiez des informations exactes et vérifiées</strong>
+                  <p>Pour les spots : vérifiez les coordonnées GPS, l'accessibilité et l'indice Bortle avant de publier. Pour les événements : ne créez que des sorties que vous organisez réellement.</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Fausses informations et intox interdites</strong>
+                  <p>La publication délibérée de fausses informations (coordonnées incorrectes, conditions inventées, événements fictifs) nuit à la communauté et engage votre responsabilité. Les doublons intentionnels sont aussi concernés.</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Spam et contenus non liés à l'astronomie prohibés</strong>
+                  <p>Les messages répétitifs, hors-sujet, publicitaires ou promotionnels sont interdits. Cela inclut les liens affiliés, la promotion de services commerciaux non approuvés et la publication en masse de contenu identique.</p>
+                </div>
+              </div>
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Respectez les droits d'auteur sur les photos</strong>
+                  <p>Ne publiez que des photos dont vous êtes l'auteur, ou pour lesquelles vous avez une autorisation explicite. Mentionnez les sources si vous partagez des images tiers.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Règle 3 : Vie privée -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-icon">🔒</div>
+              <h2>3. Vie privée et données personnelles</h2>
+            </div>
+            <div class="rule-list">
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Ne divulguez pas les données personnelles d'autres membres</strong>
+                  <p>La divulgation non consentie d'informations personnelles d'un autre membre (nom réel, adresse, photos privées, numéro de téléphone) est strictement interdite et constitue une violation grave de la charte.</p>
+                </div>
+              </div>
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Respect du droit à l'image lors des sorties</strong>
+                  <p>Lors des sorties photographiques, demandez l'autorisation avant de photographier et de publier des images de participants identifiables. Respectez les demandes de retrait de photos.</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Sites à accès privé : responsabilité individuelle</strong>
+                  <p>Ne publiez pas de spots situés sur propriété privée sans accord écrit du propriétaire. Ne partagez pas d'accès non autorisés. Les conséquences légales d'une intrusion sont à la charge exclusive de l'utilisateur.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Règle 4 : Sécurité -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-icon">⛑️</div>
+              <h2>4. Sécurité lors des sorties</h2>
+            </div>
+            <div class="rule-list">
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Signalez les risques connus sur les spots</strong>
+                  <p>Si vous connaissez des dangers particuliers sur un site (terrain difficile, zone inondable, route dangereuse), mentionnez-les dans la description ou les instructions d'accès.</p>
+                </div>
+              </div>
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Organisateurs : communiquez clairement</strong>
+                  <p>En tant qu'organisateur d'une sortie, informez les participants des conditions (météo, accès, équipement nécessaire) au moins 24h avant et communiquez en cas d'annulation.</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Ne créez pas de sorties que vous n'organisez pas</strong>
+                  <p>Créer des événements fictifs pour attirer des participants ou gonfler votre score est une violation grave entraînant une suspension immédiate et la suppression de l'événement.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Règle 5 : Gamification -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-icon">🏆</div>
+              <h2>5. Classements et gamification</h2>
+            </div>
+            <div class="rule-list">
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Manipulation du système de points interdite</strong>
+                  <p>La manipulation artificielle du score (faux comptes pour s'auto-liker, cercles de vote, bots) est interdite. Toute détection entraîne réinitialisation du score et suspension.</p>
+                </div>
+              </div>
+              <div class="rule-item forbidden">
+                <span class="rule-marker">❌</span>
+                <div class="rule-content">
+                  <strong>Signalements abusifs prohibés</strong>
+                  <p>Utiliser le système de signalement pour cibler un concurrent sur le classement ou pour harceler un membre est une violation grave. Les signalements mal fondés répétés entraînent des sanctions.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Politique de modération -->
+          <div class="legal-section" id="moderation">
+            <h2>Politique de modération</h2>
+            <p>AstroNuit applique un système de modération progressif et proportionnel :</p>
+
+            <table class="moderation-table">
+              <thead>
+                <tr>
+                  <th>Infraction</th>
+                  <th>Sévérité</th>
+                  <th>Sanction</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Langage inapproprié, commentaire hors-sujet</td>
+                  <td><span class="severity-badge severity-low">Faible</span></td>
+                  <td>Avertissement (1er) + suppression contenu</td>
+                </tr>
+                <tr>
+                  <td>Spam, fausse information, doublon intentionnel</td>
+                  <td><span class="severity-badge severity-low">Faible</span></td>
+                  <td>Avertissement + suppression contenu</td>
+                </tr>
+                <tr>
+                  <td>Insultes légères, conflit interpersonnel</td>
+                  <td><span class="severity-badge severity-med">Moyen</span></td>
+                  <td>Strike (−10 pts) + suspension 24h (3e strike = 7 jours)</td>
+                </tr>
+                <tr>
+                  <td>Harcèlement, divulgation données personnelles</td>
+                  <td><span class="severity-badge severity-high">Grave</span></td>
+                  <td>Suspension 7 à 30 jours</td>
+                </tr>
+                <tr>
+                  <td>Contenu illégal, discrimination grave, menaces</td>
+                  <td><span class="severity-badge severity-high">Critique</span></td>
+                  <td>Ban permanent + signalement autorités si nécessaire</td>
+                </tr>
+                <tr>
+                  <td>Manipulation du système, faux comptes multiples</td>
+                  <td><span class="severity-badge severity-high">Critique</span></td>
+                  <td>Ban permanent + réinitialisation score</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Escalade automatique</h3>
+            <ul style="list-style: disc; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem;">
+              <li style="color: var(--color-text-muted); font-size: var(--text-sm);"><strong>3 signalements reçus</strong> sur un même contenu → masquage automatique + file de modération</li>
+              <li style="color: var(--color-text-muted); font-size: var(--text-sm);"><strong>3 strikes</strong> → suspension automatique 7 jours</li>
+              <li style="color: var(--color-text-muted); font-size: var(--text-sm);"><strong>5 strikes</strong> → bannissement définitif</li>
+            </ul>
+
+            <div class="appeal-card">
+              <h3>⚖️ Droit d'appel</h3>
+              <p>Toute sanction peut être contestée dans un délai de 7 jours par email à <strong>moderation@astronuit.fr</strong>. L'équipe de modération s'engage à répondre sous 72 heures ouvrables. Les décisions de ban permanent peuvent être réexaminées une seule fois.</p>
+            </div>
+          </div>
+
+          <!-- Constellations -->
+          <div class="legal-section" id="constellations">
+            <h2>Rôle des Constellations</h2>
+            <p>Les Constellations sont des groupes d'astronomes amateurs organisés autour d'un leader vérifié. Les leaders de Constellations s'engagent à respecter des règles supplémentaires :</p>
+            <div class="rule-list" style="margin-top: 1rem;">
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Maintenir un espace sain dans leur Constellation</strong>
+                  <p>Les leaders sont responsables des contenus publiés dans leur Constellation et doivent modérer les débordements. Ils peuvent expulser un membre perturbateur.</p>
+                </div>
+              </div>
+              <div class="rule-item required">
+                <span class="rule-marker">✅</span>
+                <div class="rule-content">
+                  <strong>Ne pas utiliser la Constellation à des fins commerciales</strong>
+                  <p>Les Constellations sont des espaces communautaires non commerciaux. La promotion de services payants, la vente de matériel ou toute activité commerciale non approuvée par AstroNuit est interdite.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consentement -->
+          <div class="consent-section">
+            <h2>Engagement communautaire</h2>
+            <p>En créant un compte sur AstroNuit, vous confirmez avoir lu et accepté cette charte dans son intégralité. Vous vous engagez à respecter ces règles et à contribuer positivement à notre communauté de passionnés du ciel nocturne.</p>
+            <p>Cette charte peut évoluer. Les membres seront notifiés des changements significatifs par email.</p>
+            <a href="connexion.html#inscription" class="btn btn-accent btn-lg">
+              ✦ Rejoindre la communauté
+            </a>
+          </div>
+
+          <p class="legal-update">Charte communautaire — Version 1.2 — Janvier 2025 — AstroNuit</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit · <a href="mentions-legales.html">Mentions légales</a> · <a href="charte.html">Charte</a></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/static.page.js"></script>
+</body>
+</html>

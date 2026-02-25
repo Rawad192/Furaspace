@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constellations — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ── Hero ── */
+    .constellations-hero {
+      background: linear-gradient(135deg, rgba(108,62,184,0.2) 0%, rgba(16,185,129,0.08) 100%);
+      border: 1px solid rgba(108,62,184,0.25);
+      border-radius: var(--radius-xl);
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .constellations-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(108,62,184,0.15), transparent);
+      pointer-events: none;
+    }
+    .hero-stars-deco {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5rem;
+    }
+    .hero-stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 1.5rem;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-num {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--color-primary-light);
+      display: block;
+    }
+    .hero-stat-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Filtres ── */
+    .const-filters {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .const-filter-btn {
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .const-filter-btn:hover,
+    .const-filter-btn.active {
+      border-color: var(--color-primary);
+      background: rgba(108,62,184,0.15);
+      color: var(--color-text);
+    }
+    .const-search {
+      margin-left: auto;
+    }
+
+    /* ── Grille ── */
+    .constellations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Carte Constellation ── */
+    .const-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+    .const-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(108,62,184,0.5);
+    }
+    .const-card-banner {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .const-card-body { padding: 1.25rem; }
+    .const-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .const-card-name {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .const-leader-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .const-leader-badge .avatar {
+      width: 24px;
+      height: 24px;
+      font-size: 0.65rem;
+    }
+    .verified-star {
+      color: #fbbf24;
+      font-size: 0.8rem;
+    }
+    .const-description {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .const-stats {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .const-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .const-members-avatars {
+      display: flex;
+      gap: -4px;
+    }
+    .const-members-avatars .avatar {
+      width: 28px;
+      height: 28px;
+      font-size: 0.65rem;
+      border: 2px solid var(--color-bg);
+      margin-right: -6px;
+    }
+    .const-card-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .const-region-tag {
+      font-size: var(--text-xs);
+      color: var(--color-text-dim);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* ── Section "créer" ── */
+    .create-const-card {
+      background: linear-gradient(135deg, rgba(108,62,184,0.08), rgba(16,185,129,0.05));
+      border: 1px dashed rgba(108,62,184,0.4);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .create-const-card h2 {
+      font-size: var(--text-xl);
+      margin-bottom: 0.75rem;
+    }
+    .create-const-card p {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      line-height: 1.7;
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+    }
+    .eligibility-list {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1rem 0 1.5rem;
+    }
+    .elig-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+    }
+
+    /* ── Modal création ── */
+    .create-modal-form { display: flex; flex-direction: column; gap: 1.25rem; }
+    .color-picker {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { border-color: white; }
+
+    /* ── Empty state ── */
+    .constellations-empty {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .constellations-empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+
+    @media (max-width: 700px) {
+      .constellations-grid { grid-template-columns: 1fr; }
+      .hero-stats-row { gap: 1.5rem; }
+      .const-filters { gap: 0.5rem; }
+      .const-search { width: 100%; margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+
+        <!-- Hero -->
+        <div class="constellations-hero">
+          <div class="hero-stars-deco">✦ ✦ ✦</div>
+          <h1 class="page-title" style="margin-bottom:0.5rem;">Constellations</h1>
+          <p style="color: var(--color-text-muted); max-width: 500px; margin: 0 auto; font-size: var(--text-base);">
+            Des groupes d'astronomes amateurs réunis par région et passion commune. Rejoignez une Constellation ou créez la vôtre.
+          </p>
+          <div class="hero-stats-row">
+            <div class="hero-stat">
+              <span class="hero-stat-num" id="stat-constellations">24</span>
+              <span class="hero-stat-label">Constellations</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-num" id="stat-members">1 248</span>
+              <span class="hero-stat-label">Membres actifs</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-num" id="stat-events">186</span>
+              <span class="hero-stat-label">Sorties organisées</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Créer une Constellation -->
+        <div class="create-const-card" id="create-const-section">
+          <div style="font-size:2rem; margin-bottom:0.75rem;">✨</div>
+          <h2>Créez votre Constellation</h2>
+          <p>Rassemblez les passionnés de votre région autour d'un projet commun. Leader d'une Constellation, vous organisez des sorties, gérez les membres et construisez une communauté locale.</p>
+          <div class="eligibility-list">
+            <div class="elig-item">✅ Compte > 7 jours</div>
+            <div class="elig-item">✅ ≥ 5 contributions</div>
+            <div class="elig-item">✅ Aucun strike</div>
+            <div class="elig-item">✅ Pas déjà leader</div>
+          </div>
+          <button class="btn btn-accent btn-lg" id="btn-create-constellation">
+            ✦ Créer une Constellation
+          </button>
+        </div>
+
+        <!-- Filtres -->
+        <div class="const-filters">
+          <button class="const-filter-btn active" data-filter="all">Toutes</button>
+          <button class="const-filter-btn" data-filter="Île-de-France">Île-de-France</button>
+          <button class="const-filter-btn" data-filter="PACA">PACA</button>
+          <button class="const-filter-btn" data-filter="Bretagne">Bretagne</button>
+          <button class="const-filter-btn" data-filter="Occitanie">Occitanie</button>
+          <button class="const-filter-btn" data-filter="Auvergne-RA">Auvergne-RA</button>
+          <div class="const-search">
+            <input type="search" class="form-input" id="const-search" placeholder="🔍 Rechercher..." style="width: 220px;">
+          </div>
+        </div>
+
+        <!-- Grille -->
+        <div class="constellations-grid" id="constellations-grid">
+          <!-- Injecté par JS -->
+        </div>
+
+        <div class="constellations-empty" id="constellations-empty" style="display:none;">
+          <div class="constellations-empty-icon">🔭</div>
+          <h3>Aucune Constellation trouvée</h3>
+          <p style="color: var(--color-text-muted);">Soyez le premier à créer une Constellation dans cette région !</p>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" style="margin-bottom: 2rem;">
+          <button class="btn btn-ghost btn-sm" id="btn-prev" disabled>← Précédent</button>
+          <span class="pagination-info" id="pagination-info">Page 1 / 2</span>
+          <button class="btn btn-ghost btn-sm" id="btn-next">Suivant →</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal création Constellation -->
+    <div class="modal" id="create-modal" style="display:none;">
+      <div class="modal-overlay" onclick="closeCreateModal()"></div>
+      <div class="modal-content card" style="max-width: 540px;">
+        <div class="card-header">
+          <h2>✦ Créer une Constellation</h2>
+          <button class="modal-close" onclick="closeCreateModal()">✕</button>
+        </div>
+        <div class="card-body">
+          <div class="create-modal-form">
+            <div class="form-group">
+              <label class="form-label">Nom de la Constellation *</label>
+              <input type="text" class="form-input" id="const-name" maxlength="50" placeholder="Ex: Observateurs du Vercors">
+              <span class="form-hint">Choisissez un nom évocateur lié à votre région ou votre passion</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Région principale *</label>
+              <select class="form-select" id="const-region">
+                <option value="">Sélectionnez...</option>
+                <option>Île-de-France</option>
+                <option>Auvergne-Rhône-Alpes</option>
+                <option>Bretagne</option>
+                <option>Occitanie</option>
+                <option>Provence-Alpes-Côte d'Azur</option>
+                <option>Normandie</option>
+                <option>Nouvelle-Aquitaine</option>
+                <option>Grand Est</option>
+                <option>Hauts-de-France</option>
+                <option>Centre-Val de Loire</option>
+                <option>Bourgogne-Franche-Comté</option>
+                <option>Pays de la Loire</option>
+                <option>Corse</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description *</label>
+              <textarea class="form-textarea" id="const-description" rows="3" maxlength="300"
+                placeholder="Décrivez votre Constellation : zone d'activité, objectifs, type d'observations préférées..."></textarea>
+              <span class="form-hint" id="desc-counter">0 / 300 caractères</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Couleur thème</label>
+              <div class="color-picker" id="color-picker">
+                <div class="color-swatch selected" data-color="#6c3eb8" style="background:#6c3eb8;"></div>
+                <div class="color-swatch" data-color="#10b981" style="background:#10b981;"></div>
+                <div class="color-swatch" data-color="#3b82f6" style="background:#3b82f6;"></div>
+                <div class="color-swatch" data-color="#f59e0b" style="background:#f59e0b;"></div>
+                <div class="color-swatch" data-color="#ef4444" style="background:#ef4444;"></div>
+                <div class="color-swatch" data-color="#ec4899" style="background:#ec4899;"></div>
+                <div class="color-swatch" data-color="#14b8a6" style="background:#14b8a6;"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="const-charter" required>
+                <span>Je m'engage à respecter la <a href="charte.html" target="_blank">charte des organisateurs</a> et à animer activement ma Constellation</span>
+              </label>
+            </div>
+
+            <button class="btn btn-accent btn-lg" id="btn-submit-constellation" onclick="submitConstellation()">
+              ✦ Créer la Constellation
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit · <a href="mentions-legales.html">Mentions légales</a> · <a href="charte.html">Charte</a></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/constellations.page.js"></script>
+  <script src="js/constellations.js"></script>
+</body>
+</html>

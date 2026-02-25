@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AstroNuit — Découvrez les meilleurs spots d'observation du ciel nocturne en France, ajoutés par la communauté.">
+  <title>Spots d'observation — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/lieux.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link active"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <!-- ===== EN-TÊTE ===== -->
+      <div class="lieux-header">
+        <div class="container">
+          <div class="lieux-header-content">
+            <div>
+              <h1 class="page-title">Spots d'observation</h1>
+              <p class="page-subtitle">
+                <span id="lieux-count" class="count-highlight">248</span> lieux référencés par la communauté en France
+              </p>
+            </div>
+            <a href="ajouter-lieu.html" class="btn btn-accent btn-lg" id="btn-add-lieu">
+              + Ajouter un spot
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- ===== BARRE FILTRES ===== -->
+        <div class="lieux-filters card">
+          <div class="card-body">
+            <div class="filters-row">
+              <!-- Recherche -->
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="form-input search-input" id="search-input"
+                  placeholder="Rechercher un lieu, une région...">
+              </div>
+
+              <!-- Type -->
+              <div class="filter-group">
+                <label class="form-label">Type</label>
+                <select class="form-select filter-select" id="filter-type">
+                  <option value="">Tous</option>
+                  <option value="observation">🔭 Observation</option>
+                  <option value="panorama">🏔️ Panorama</option>
+                </select>
+              </div>
+
+              <!-- Bortle -->
+              <div class="filter-group">
+                <label class="form-label">Bortle max</label>
+                <select class="form-select filter-select" id="filter-bortle">
+                  <option value="">Tous</option>
+                  <option value="2">≤ 2 (Ciel noir)</option>
+                  <option value="3">≤ 3 (Rural)</option>
+                  <option value="5">≤ 5 (Suburban)</option>
+                </select>
+              </div>
+
+              <!-- Accès -->
+              <div class="filter-group">
+                <label class="form-label">Accès</label>
+                <select class="form-select filter-select" id="filter-access">
+                  <option value="">Tous</option>
+                  <option value="foot">👟 À pied</option>
+                  <option value="car">🚗 Voiture</option>
+                  <option value="4x4">🚙 4x4</option>
+                </select>
+              </div>
+
+              <!-- Distance -->
+              <div class="filter-group">
+                <label class="form-label">Distance</label>
+                <select class="form-select filter-select" id="filter-distance">
+                  <option value="">Partout</option>
+                  <option value="50">< 50 km</option>
+                  <option value="100">< 100 km</option>
+                  <option value="200">< 200 km</option>
+                </select>
+              </div>
+
+              <!-- Tri -->
+              <div class="filter-group">
+                <label class="form-label">Trier par</label>
+                <select class="form-select filter-select" id="filter-sort">
+                  <option value="recent">Plus récents</option>
+                  <option value="popular">Plus populaires</option>
+                  <option value="bortle">Meilleur ciel</option>
+                  <option value="visited">Plus visités</option>
+                </select>
+              </div>
+
+              <div class="filter-actions">
+                <button class="btn btn-ghost btn-sm" id="btn-reset-filters">↺ Effacer</button>
+                <button class="btn btn-primary btn-sm" id="btn-geolocate-lieux">📍 Près de moi</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TOGGLE VUE ===== -->
+        <div class="view-controls">
+          <div class="view-toggle-group">
+            <button class="view-btn active" data-view="grid">
+              ⊞ Grille
+            </button>
+            <button class="view-btn" data-view="list">
+              ≡ Liste
+            </button>
+            <button class="view-btn" data-view="map">
+              🗺️ Carte
+            </button>
+          </div>
+          <div class="results-count">
+            <span id="filtered-count">248</span> spots trouvés
+          </div>
+        </div>
+
+        <!-- ===== VUE GRILLE ===== -->
+        <div id="view-grid" class="lieux-grid grid grid-3">
+          <!-- Chargé dynamiquement par js/lieux.js -->
+        </div>
+
+        <!-- ===== VUE LISTE ===== -->
+        <div id="view-list" class="lieux-list" style="display:none;">
+          <!-- Chargé dynamiquement -->
+        </div>
+
+        <!-- ===== VUE CARTE ===== -->
+        <div id="view-map" class="lieux-map-container" style="display:none;">
+          <div id="lieux-map" style="height: 70vh; border-radius: var(--radius-xl);"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="lieux-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">🔭</div>
+          <h2>Aucun spot trouvé</h2>
+          <p>Essayez d'élargir vos filtres ou <a href="ajouter-lieu.html">ajoutez le premier spot</a> de cette zone !</p>
+        </div>
+
+        <!-- Pagination / Charger plus -->
+        <div class="load-more-container" id="load-more-container">
+          <button class="btn btn-outline btn-lg" id="btn-load-more">
+            Charger plus de spots
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== STATS COMMUNAUTÉ ===== -->
+      <section class="section community-stats-section">
+        <div class="container">
+          <div class="community-stats-grid">
+            <div class="community-stat card">
+              <div class="card-body" style="text-align:center;">
+                <div class="community-stat-number">248</div>
+                <div class="community-stat-label">Spots référencés</div>
+              </div>
+            </div>
+            <div class="community-stat card">
+              <div class="card-body" style="text-align:center;">
+                <div class="community-stat-number">1,847</div>
+                <div class="community-stat-label">Check-ins</div>
+              </div>
+            </div>
+            <div class="community-stat card">
+              <div class="card-body" style="text-align:center;">
+                <div class="community-stat-number">96</div>
+                <div class="community-stat-label">Départements couverts</div>
+              </div>
+            </div>
+            <div class="community-stat card">
+              <div class="card-body" style="text-align:center;">
+                <div class="community-stat-number">64%</div>
+                <div class="community-stat-label">Spots Bortle ≤ 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TOP CONTRIBUTEURS ===== -->
+      <section class="section contributors-section">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">🏆 Top Contributeurs</h2>
+            <div class="cosmic-divider"></div>
+            <p class="section-subtitle">Les membres qui enrichissent le plus la communauté</p>
+          </div>
+          <div class="contributors-grid" id="top-contributors">
+            <!-- Rendu par js/lieux.js -->
+            <div class="contributor-card card">
+              <div class="card-body">
+                <div class="contributor-rank gold">1</div>
+                <div class="avatar contributor-avatar">A</div>
+                <div class="contributor-info">
+                  <div class="contributor-name">@astronome_pro</div>
+                  <div class="contributor-stats">28 spots · 🗺️ Cartographe</div>
+                </div>
+                <div class="contributor-badge">🌌</div>
+              </div>
+            </div>
+            <div class="contributor-card card">
+              <div class="card-body">
+                <div class="contributor-rank silver">2</div>
+                <div class="avatar contributor-avatar">S</div>
+                <div class="contributor-info">
+                  <div class="contributor-name">@stargazer42</div>
+                  <div class="contributor-stats">19 spots · 🔭 Passionné</div>
+                </div>
+                <div class="contributor-badge">🔭</div>
+              </div>
+            </div>
+            <div class="contributor-card card">
+              <div class="card-body">
+                <div class="contributor-rank bronze">3</div>
+                <div class="avatar contributor-avatar">C</div>
+                <div class="contributor-info">
+                  <div class="contributor-name">@ciel_breton</div>
+                  <div class="contributor-stats">14 spots · 🗺️ Cartographe</div>
+                </div>
+                <div class="contributor-badge">🗺️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-brand">Astro<span>Nuit</span></div>
+            <p class="footer-desc">La carte collaborative des spots d'observation nocturne en France.</p>
+          </div>
+          <div>
+            <p class="footer-title">Spots</p>
+            <ul class="footer-links">
+              <li><a href="lieux.html" class="footer-link">Tous les spots</a></li>
+              <li><a href="ajouter-lieu.html" class="footer-link">Ajouter un spot</a></li>
+              <li><a href="collections.html" class="footer-link">Collections</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="footer-title">Communauté</p>
+            <ul class="footer-links">
+              <li><a href="evenements.html" class="footer-link">Sorties</a></li>
+              <li><a href="galerie.html" class="footer-link">Galerie</a></li>
+              <li><a href="connexion.html" class="footer-link">S'inscrire</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="footer-title">Navigation</p>
+            <ul class="footer-links">
+              <li><a href="ciel-du-soir.html" class="footer-link">Ciel du soir</a></li>
+              <li><a href="carte.html" class="footer-link">Carte</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit — Fait avec ✦ pour les passionnés du ciel</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+  <script src="js/stars.js"></script>
+  <script src="js/astronomy.js"></script>
+  <script type="module" src="js/pages/lieux.page.js"></script>
+</body>
+</html>

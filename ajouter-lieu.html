@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AstroNuit — Ajoutez un nouveau spot d'observation du ciel nocturne.">
+  <title>Ajouter un spot — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    /* ===== FORMULAIRE 3 ÉTAPES ===== */
+    .add-lieu-page {
+      padding: var(--space-10) 0 var(--space-16);
+    }
+
+    .add-lieu-header {
+      text-align: center;
+      margin-bottom: var(--space-8);
+    }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: var(--space-8);
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--text-sm);
+      border: 2px solid var(--color-border-subtle);
+      color: var(--color-text-dim);
+      background: var(--color-bg-card);
+      transition: all var(--transition-base);
+      flex-shrink: 0;
+    }
+
+    .step-circle.active {
+      border-color: var(--color-primary);
+      background: rgba(108,62,184,.25);
+      color: var(--color-primary-light);
+    }
+
+    .step-circle.done {
+      border-color: #4ade80;
+      background: rgba(74,222,128,.15);
+      color: #4ade80;
+    }
+
+    .step-label {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    .step-item.active .step-label {
+      color: var(--color-primary-light);
+      font-weight: 600;
+    }
+
+    .step-item.done .step-label {
+      color: #4ade80;
+    }
+
+    .step-connector {
+      width: 60px;
+      height: 2px;
+      background: var(--color-border-subtle);
+      margin: 0 var(--space-2);
+      flex-shrink: 0;
+    }
+
+    .step-connector.done {
+      background: linear-gradient(90deg, #4ade80, var(--color-primary));
+    }
+
+    /* Panneaux d'étapes */
+    .step-panel {
+      display: none;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .step-panel.active {
+      display: block;
+    }
+
+    .step-panel .card {
+      margin-bottom: var(--space-4);
+    }
+
+    /* Carte Leaflet pour localisation */
+    #pick-map {
+      height: 350px;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border-subtle);
+      cursor: crosshair;
+      margin-top: var(--space-3);
+    }
+
+    #pick-map.has-marker {
+      border-color: var(--color-primary);
+    }
+
+    .map-hint {
+      text-align: center;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: rgba(108,62,184,.08);
+      border-radius: var(--radius-full);
+    }
+
+    .coords-display {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-3);
+    }
+
+    .coords-display .form-group {
+      flex: 1;
+    }
+
+    /* Facilities checkboxes */
+    .facilities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3);
+    }
+
+    .facility-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+
+    .facility-toggle:hover {
+      background: rgba(108,62,184,.1);
+      border-color: var(--color-primary);
+    }
+
+    .facility-toggle input[type=checkbox] {
+      display: none;
+    }
+
+    .facility-toggle.checked {
+      background: rgba(74,222,128,.1);
+      border-color: rgba(74,222,128,.4);
+      color: #4ade80;
+    }
+
+    .facility-icon { font-size: 1.2rem; }
+    .facility-label { font-size: var(--text-sm); font-weight: 500; }
+
+    /* Type picker */
+    .type-picker {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+    }
+
+    .type-option {
+      padding: var(--space-5);
+      background: rgba(255,255,255,.03);
+      border: 2px solid var(--color-border-subtle);
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      text-align: center;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+
+    .type-option:hover {
+      background: rgba(108,62,184,.1);
+      border-color: var(--color-primary);
+    }
+
+    .type-option.selected {
+      background: rgba(108,62,184,.2);
+      border-color: var(--color-primary);
+    }
+
+    .type-option-icon { font-size: 2.2rem; margin-bottom: var(--space-2); }
+    .type-option-name { font-weight: 700; font-family: var(--font-heading); }
+    .type-option-desc { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 4px; }
+
+    /* Preview (étape 3) */
+    .preview-hero {
+      height: 140px;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      background: linear-gradient(135deg, #0d0d2b, #1a0533 50%, #0a1a3a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      opacity: .6;
+    }
+
+    .preview-card {
+      overflow: hidden;
+    }
+
+    .step-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-5);
+    }
+
+    .step-progress {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* Bortle color hint */
+    .bortle-hint {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      margin-top: var(--space-2);
+    }
+
+    .bortle-hint-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+
+    .bortle-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .step-label { display: none; }
+      .step-connector { width: 32px; }
+      .facilities-grid { grid-template-columns: 1fr 1fr; }
+      .type-picker { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link active"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="add-lieu-page">
+      <div class="container">
+
+        <div class="add-lieu-header">
+          <h1 class="page-title">Ajouter un spot</h1>
+          <p class="page-subtitle">Partagez vos meilleurs spots d'observation avec la communauté</p>
+        </div>
+
+        <!-- Stepper -->
+        <div class="stepper" id="stepper">
+          <div class="step-item active" id="step-item-1">
+            <div class="step-circle active" id="step-circle-1">1</div>
+            <span class="step-label">Informations</span>
+          </div>
+          <div class="step-connector" id="step-connector-1"></div>
+          <div class="step-item" id="step-item-2">
+            <div class="step-circle" id="step-circle-2">2</div>
+            <span class="step-label">Localisation</span>
+          </div>
+          <div class="step-connector" id="step-connector-2"></div>
+          <div class="step-item" id="step-item-3">
+            <div class="step-circle" id="step-circle-3">3</div>
+            <span class="step-label">Confirmation</span>
+          </div>
+        </div>
+
+        <!-- ===== ÉTAPE 1 : Informations ===== -->
+        <div class="step-panel active" id="panel-1">
+          <div class="card">
+            <div class="card-header"><h2>📝 Informations de base</h2></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label required">Nom du spot</label>
+                <input type="text" class="form-input" id="lieu-name"
+                  placeholder="Ex: Causse Méjean — Chaos de Nîmes-le-Vieux" maxlength="80">
+                <span class="form-hint">Soyez précis pour aider les autres à trouver l'endroit exact</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label required">Description</label>
+                <textarea class="form-textarea" id="lieu-desc" rows="4"
+                  placeholder="Décrivez le spot : horizon, équipements, accès, ce qui le rend exceptionnel…" maxlength="1000"></textarea>
+                <span class="form-hint" id="desc-counter">0 / 1000 caractères</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label required">Type de lieu</label>
+                <div class="type-picker" id="type-picker">
+                  <div class="type-option selected" data-type="observation">
+                    <div class="type-option-icon">🔭</div>
+                    <div class="type-option-name">Site d'observation</div>
+                    <div class="type-option-desc">Idéal pour les télescopes, ciel dégagé, Bortle faible</div>
+                  </div>
+                  <div class="type-option" data-type="panorama">
+                    <div class="type-option-icon">🏔️</div>
+                    <div class="type-option-name">Point de vue nocturne</div>
+                    <div class="type-option-desc">Vue panoramique, photogénique même si Bortle plus élevé</div>
+                  </div>
+                </div>
+                <input type="hidden" id="lieu-type" value="observation">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label required">Indice Bortle (pollution lumineuse)</label>
+                <select class="form-select" id="lieu-bortle">
+                  <option value="">-- Sélectionner --</option>
+                  <option value="1">1 — Ciel noir exceptionnel (zone naturelle isolée)</option>
+                  <option value="2">2 — Ciel noir (excellente nuit en campagne)</option>
+                  <option value="3">3 — Rural (voie lactée bien visible)</option>
+                  <option value="4">4 — Rural/Suburban (zones rurales normales)</option>
+                  <option value="5">5 — Suburban (banlieue peu dense)</option>
+                  <option value="6">6 — Suburban lumineux (banlieue dense)</option>
+                  <option value="7">7 — Ville (lumières de la ville visibles)</option>
+                  <option value="8">8 — Ville lumineuse</option>
+                  <option value="9">9 — Centre-ville (ciel gris-blanc)</option>
+                </select>
+                <div class="bortle-hint">
+                  <div class="bortle-hint-item"><span class="bortle-dot" style="background:#4ade80;"></span>1–2 : Idéal</div>
+                  <div class="bortle-hint-item"><span class="bortle-dot" style="background:#facc15;"></span>3–4 : Bon</div>
+                  <div class="bortle-hint-item"><span class="bortle-dot" style="background:#fb923c;"></span>5–6 : Correct</div>
+                  <div class="bortle-hint-item"><span class="bortle-dot" style="background:#f87171;"></span>7–9 : Urbain</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h2>🏃 Accès et équipements</h2></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label required">Type d'accès</label>
+                <select class="form-select" id="lieu-access">
+                  <option value="">-- Sélectionner --</option>
+                  <option value="foot">👟 À pied (sentier ou chemin)</option>
+                  <option value="car">🚗 En voiture (route normale)</option>
+                  <option value="4x4">🚙 4x4 / VTT requis (piste)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Équipements disponibles</label>
+                <div class="facilities-grid" id="facilities-grid">
+                  <label class="facility-toggle" id="fac-parking">
+                    <input type="checkbox" id="fac-parking-cb">
+                    <span class="facility-icon">🅿️</span>
+                    <span class="facility-label">Parking</span>
+                  </label>
+                  <label class="facility-toggle" id="fac-water">
+                    <input type="checkbox" id="fac-water-cb">
+                    <span class="facility-icon">💧</span>
+                    <span class="facility-label">Eau potable</span>
+                  </label>
+                  <label class="facility-toggle" id="fac-shelter">
+                    <input type="checkbox" id="fac-shelter-cb">
+                    <span class="facility-icon">🏠</span>
+                    <span class="facility-label">Abri</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Accès au terrain</label>
+                <div class="facility-toggle" id="fac-public" style="max-width:280px;">
+                  <input type="checkbox" id="fac-public-cb" checked>
+                  <span class="facility-icon">✅</span>
+                  <span class="facility-label">Accès libre (terrain public)</span>
+                </div>
+                <span class="form-hint" style="margin-top:var(--space-2);">
+                  Décochez si l'accès nécessite une autorisation ou est sur terrain privé
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <a href="lieux.html" class="btn btn-ghost">← Retour</a>
+            <div class="step-progress">Étape 1 / 3</div>
+            <button class="btn btn-primary btn-lg" onclick="goToStep(2)">
+              Continuer → Localisation
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== ÉTAPE 2 : Localisation ===== -->
+        <div class="step-panel" id="panel-2">
+          <div class="card">
+            <div class="card-header">
+              <h2>📍 Localisation sur la carte</h2>
+              <button class="btn btn-ghost btn-sm" id="btn-geolocate-form">📍 Utiliser ma position</button>
+            </div>
+            <div class="card-body">
+              <p style="color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-3);">
+                Cliquez sur la carte pour placer le marqueur du spot. Vous pouvez zoomer pour être plus précis.
+              </p>
+              <div id="pick-map"></div>
+              <p class="map-hint" id="map-hint">🗺️ Cliquez sur la carte pour placer le spot</p>
+
+              <div class="coords-display">
+                <div class="form-group">
+                  <label class="form-label">Latitude</label>
+                  <input type="number" class="form-input" id="lieu-lat" placeholder="Ex: 44.2833" step="0.0001" min="-90" max="90">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Longitude</label>
+                  <input type="number" class="form-input" id="lieu-lng" placeholder="Ex: 3.3500" step="0.0001" min="-180" max="180">
+                </div>
+              </div>
+              <span class="form-hint">Vous pouvez aussi saisir les coordonnées GPS directement</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h2>🗺️ Informations géographiques</h2></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Région</label>
+                <select class="form-select" id="lieu-region">
+                  <option value="">-- Sélectionner --</option>
+                  <option>Auvergne-Rhône-Alpes</option>
+                  <option>Bourgogne-Franche-Comté</option>
+                  <option>Bretagne</option>
+                  <option>Centre-Val de Loire</option>
+                  <option>Corse</option>
+                  <option>Grand Est</option>
+                  <option>Hauts-de-France</option>
+                  <option>Île-de-France</option>
+                  <option>Normandie</option>
+                  <option>Nouvelle-Aquitaine</option>
+                  <option>Occitanie</option>
+                  <option>Pays de la Loire</option>
+                  <option>Provence-Alpes-Côte d'Azur</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Indications d'accès</label>
+                <textarea class="form-textarea" id="lieu-directions" rows="3"
+                  placeholder="Ex: Se garer au parking du col, puis suivre le sentier balisé GR vers le nord pendant 800m…"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn btn-ghost" onclick="goToStep(1)">← Retour</button>
+            <div class="step-progress">Étape 2 / 3</div>
+            <button class="btn btn-primary btn-lg" onclick="goToStep(3)">
+              Continuer → Confirmation
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== ÉTAPE 3 : Confirmation ===== -->
+        <div class="step-panel" id="panel-3">
+          <div class="card preview-card">
+            <div class="preview-hero" id="preview-hero">🔭</div>
+            <div class="card-body">
+              <div id="preview-badges" style="display:flex;gap:var(--space-2);margin-bottom:var(--space-3);flex-wrap:wrap;"></div>
+              <h2 id="preview-name" style="font-size:var(--text-2xl);margin-bottom:var(--space-2);">Nom du spot</h2>
+              <p id="preview-location" style="color:var(--color-text-muted);margin-bottom:var(--space-3);">📍 Localisation</p>
+              <p id="preview-desc" style="color:var(--color-text-muted);font-size:var(--text-sm);line-height:1.6;margin-bottom:var(--space-4);"></p>
+              <div id="preview-tags" style="display:flex;gap:var(--space-2);flex-wrap:wrap;"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <label class="form-label" style="display:flex;gap:var(--space-3);align-items:center;cursor:pointer;">
+                <input type="checkbox" id="confirm-check" style="width:18px;height:18px;accent-color:var(--color-primary);">
+                <span>Je confirme que ces informations sont correctes et que ce spot est accessible légalement</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn btn-ghost" onclick="goToStep(2)">← Modifier</button>
+            <div class="step-progress">Étape 3 / 3</div>
+            <button class="btn btn-accent btn-lg" id="btn-submit-lieu">
+              ✦ Publier le spot
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-brand">Astro<span>Nuit</span></div>
+            <p class="footer-desc">La carte collaborative des spots d'observation nocturne en France.</p>
+          </div>
+          <div>
+            <p class="footer-title">Spots</p>
+            <ul class="footer-links">
+              <li><a href="lieux.html" class="footer-link">Tous les spots</a></li>
+              <li><a href="ajouter-lieu.html" class="footer-link">Ajouter un spot</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit — Fait avec ✦ pour les passionnés du ciel</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/ajouter-lieu.page.js"></script>
+</body>
+</html>

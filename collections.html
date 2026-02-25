@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AstroNuit — Collections de spots d'observation partagées par la communauté.">
+  <title>Collections — AstroNuit</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ===== COLLECTIONS ===== */
+    .collections-header {
+      padding: var(--space-10) 0 var(--space-6);
+      background: linear-gradient(180deg, rgba(108,62,184,.1) 0%, transparent 100%);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .collections-header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+    }
+
+    /* Tabs */
+    .collections-tabs {
+      display: flex;
+      gap: var(--space-1);
+      margin: var(--space-6) 0 var(--space-5);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      width: fit-content;
+    }
+
+    .collection-tab {
+      padding: var(--space-2) var(--space-5);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      transition: all var(--transition-fast);
+    }
+
+    .collection-tab.active {
+      background: rgba(108,62,184,.25);
+      color: var(--color-primary-light);
+    }
+
+    /* Collection card */
+    .collection-card {
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      overflow: hidden;
+    }
+
+    .collection-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-glow-sm);
+    }
+
+    .collection-cover {
+      height: 160px;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 2px;
+    }
+
+    .collection-cover-cell {
+      background: linear-gradient(135deg, #0d0d2b, #1a1a4e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      opacity: .7;
+      position: relative;
+    }
+
+    .collection-cover-cell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(108,62,184,.2) 0%, transparent 70%);
+    }
+
+    .collection-cover-cell.main {
+      grid-column: span 2;
+      font-size: 2.4rem;
+      opacity: .75;
+    }
+
+    .collection-cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(10,10,15,.85) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .collection-public-badge {
+      position: absolute;
+      top: var(--space-3);
+      right: var(--space-3);
+    }
+
+    .collection-body {
+      padding: var(--space-4);
+    }
+
+    .collection-name {
+      font-weight: 700;
+      font-family: var(--font-heading);
+      font-size: var(--text-base);
+      margin-bottom: var(--space-1);
+    }
+
+    .collection-meta {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-3);
+    }
+
+    .collection-spots-preview {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .collection-spot-tag {
+      font-size: var(--text-xs);
+      padding: 2px var(--space-2);
+      background: rgba(108,62,184,.12);
+      border: 1px solid rgba(108,62,184,.25);
+      border-radius: var(--radius-full);
+      color: var(--color-primary-light);
+    }
+
+    .collection-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--color-border-subtle);
+    }
+
+    .collection-author {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+
+    .collection-author .avatar {
+      width: 24px;
+      height: 24px;
+      font-size: .7rem;
+    }
+
+    .collection-actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    /* Modal créer collection */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+    }
+
+    .modal {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-2xl);
+      width: 100%;
+      max-width: 520px;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: var(--space-2);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+
+    .modal-close:hover {
+      background: rgba(255,255,255,.06);
+      color: var(--color-text);
+    }
+
+    .modal-body { padding: var(--space-6); }
+
+    /* Spots dans une collection (vue détail) */
+    .collection-detail-header {
+      padding: var(--space-8) 0;
+    }
+
+    .collection-spots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+
+    /* Share banner */
+    .share-banner {
+      background: linear-gradient(135deg, rgba(108,62,184,.15), rgba(30,90,200,.1));
+      border: 1px solid rgba(108,62,184,.25);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5) var(--space-6);
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .share-banner-icon { font-size: 2rem; }
+    .share-banner-info { flex: 1; }
+    .share-banner-title { font-weight: 700; }
+    .share-banner-url {
+      font-family: monospace;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      word-break: break-all;
+    }
+
+    @media (max-width: 768px) {
+      .collections-header-content { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars-canvas"></canvas>
+  <div class="page-wrapper">
+
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="navbar-brand">
+          <span class="brand-icon">✦</span>
+          <span class="brand-name">Astro<span>Nuit</span></span>
+        </a>
+        <ul class="navbar-nav" id="navbar-nav">
+          <li><a href="lieux.html" class="nav-link active"><span>📍</span> Spots</a></li>
+          <li><a href="evenements.html" class="nav-link"><span>📅</span> Sorties</a></li>
+          <li><a href="carte.html" class="nav-link"><span>🗺️</span> Carte</a></li>
+          <li><a href="ciel-du-soir.html" class="nav-link"><span>🔭</span> Ciel du soir</a></li>
+          <li><a href="galerie.html" class="nav-link"><span>📸</span> Galerie</a></li>
+        </ul>
+        <div class="navbar-actions">
+          <a href="connexion.html" class="btn btn-outline btn-sm" id="btn-login">Connexion</a>
+          <a href="connexion.html#inscription" class="btn btn-primary btn-sm" id="btn-register">Rejoindre</a>
+          <div class="navbar-user" id="navbar-user" style="display:none;">
+            <div class="avatar" id="user-avatar">?</div>
+          </div>
+          <button class="navbar-toggle" id="navbar-toggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="collections-header">
+        <div class="container">
+          <div class="collections-header-content">
+            <div>
+              <h1 class="page-title">Collections de spots</h1>
+              <p class="page-subtitle">Des sélections thématiques partagées par la communauté</p>
+            </div>
+            <button class="btn btn-accent btn-lg" id="btn-new-collection">
+              ✦ Créer une collection
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- Tabs -->
+        <div class="collections-tabs">
+          <button class="collection-tab active" data-tab="public">🌐 Collections publiques</button>
+          <button class="collection-tab" data-tab="mine">⭐ Mes collections</button>
+        </div>
+
+        <!-- Panneau "Publiques" -->
+        <div id="tab-public">
+          <div class="grid grid-3" id="public-collections-grid">
+            <!-- Rendu par JS -->
+          </div>
+        </div>
+
+        <!-- Panneau "Mes collections" -->
+        <div id="tab-mine" style="display:none;">
+          <div class="share-banner">
+            <div class="share-banner-icon">🔗</div>
+            <div class="share-banner-info">
+              <div class="share-banner-title">Partagez vos collections !</div>
+              <div style="font-size:var(--text-sm);color:var(--color-text-muted);margin-top:4px;">
+                Chaque collection publique a une URL unique que vous pouvez partager avec n'importe qui.
+              </div>
+            </div>
+          </div>
+          <div id="mine-empty" style="display:none;">
+            <div class="empty-state" style="padding:var(--space-12) 0;">
+              <div class="empty-icon">⭐</div>
+              <h2>Aucune collection</h2>
+              <p>Créez votre première collection pour organiser vos spots favoris.</p>
+              <button class="btn btn-accent btn-lg" style="margin-top:var(--space-4);" id="btn-new-collection-empty">
+                ✦ Créer une collection
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-3" id="mine-collections-grid">
+            <!-- Rendu par JS -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-brand">Astro<span>Nuit</span></div>
+            <p class="footer-desc">La carte collaborative des spots d'observation nocturne en France.</p>
+          </div>
+          <div>
+            <p class="footer-title">Spots</p>
+            <ul class="footer-links">
+              <li><a href="lieux.html" class="footer-link">Tous les spots</a></li>
+              <li><a href="ajouter-lieu.html" class="footer-link">Ajouter un spot</a></li>
+              <li><a href="collections.html" class="footer-link">Collections</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2025 AstroNuit — Fait avec ✦ pour les passionnés du ciel</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Modal créer collection -->
+  <div class="modal-overlay" id="modal-create" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>✦ Nouvelle collection</h3>
+        <button class="modal-close" id="modal-create-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nom de la collection</label>
+          <input type="text" class="form-input" id="new-collection-name" placeholder="Ex: Mes meilleurs Bortle 1-2" maxlength="60">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description (optionnel)</label>
+          <textarea class="form-textarea" id="new-collection-desc" rows="2"
+            placeholder="Décrivez votre sélection…" maxlength="300"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex;align-items:center;gap:var(--space-3);cursor:pointer;">
+            <input type="checkbox" id="new-collection-public" checked style="width:18px;height:18px;accent-color:var(--color-primary);">
+            <div>
+              <div>Collection publique</div>
+              <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Visible par toute la communauté avec un lien partageable</div>
+            </div>
+          </label>
+        </div>
+        <button class="btn btn-accent" style="width:100%;" id="btn-confirm-create">Créer la collection</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/stars.js"></script>
+  <script type="module" src="js/pages/collections.page.js"></script>
+</body>
+</html>

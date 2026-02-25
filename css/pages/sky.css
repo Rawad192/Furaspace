@@ -1,0 +1,181 @@
+/* ===== CIEL DU SOIR ===== */
+.sky-location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.sky-summary {
+  margin-bottom: var(--space-8);
+}
+
+.sky-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-4);
+}
+
+.sky-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+}
+
+.sky-item-icon {
+  font-size: 2rem;
+}
+
+.sky-item-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sky-item-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-star);
+}
+
+/* Stellarium */
+.stellarium-section {
+  margin-bottom: var(--space-8);
+}
+
+.stellarium-container {
+  position: relative;
+}
+
+.stellarium-iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.stellarium-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: var(--space-4);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.stellarium-hint p {
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+}
+
+/* Planètes */
+.planets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+
+.planet-card {
+  text-align: center;
+}
+
+.planet-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-3);
+}
+
+.planet-card h3 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
+}
+
+.planet-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.planet-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.planet-detail span {
+  color: var(--color-text-muted);
+}
+
+/* Événements astro */
+.astro-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.astro-event-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.astro-event-date {
+  text-align: center;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.date-num {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.date-month {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.astro-event-info {
+  flex: 1;
+}
+
+.astro-event-info h4 {
+  font-size: var(--text-base);
+  margin-bottom: var(--space-1);
+}
+
+.astro-event-info p {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 1024px) {
+  .sky-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .planets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .sky-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .planets-grid {
+    grid-template-columns: 1fr;
+  }
+}
