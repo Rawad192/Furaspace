@@ -114,11 +114,21 @@ export function getCurrentUser() {
 
 /**
  * Attend que l'état auth soit résolu (utile au chargement initial)
+ * Timeout de sécurité pour éviter un blocage infini si Firebase Auth
+ * ne se résout pas (problème réseau, init échouée).
+ * @param {number} timeoutMs - délai max en ms (défaut: 8000)
  * @returns {Promise<import('firebase/auth').User|null>}
  */
-export function waitForAuth() {
+export function waitForAuth(timeoutMs = 8000) {
   return new Promise(resolve => {
+    const timer = setTimeout(() => {
+      unsub();
+      console.warn('[AstroNuit] waitForAuth timeout — traitement comme non-authentifié');
+      resolve(null);
+    }, timeoutMs);
+
     const unsub = onAuthStateChanged(auth, user => {
+      clearTimeout(timer);
       unsub();
       resolve(user);
     });

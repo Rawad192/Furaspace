@@ -13,7 +13,8 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 import {
-  initializeFirestore, persistentLocalCache, persistentMultipleTabManager
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  getFirestore
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 import { getStorage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
@@ -35,9 +36,18 @@ const app = initializeApp(FIREBASE_CONFIG);
 export const auth = getAuth(app);
 
 // Firestore avec persistence offline multi-onglets (API moderne, remplace enableIndexedDbPersistence)
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
+// Fallback sur getFirestore si la persistence échoue (navigation privée, IndexedDB indisponible,
+// appel multiple depuis un autre onglet, etc.)
+let _db;
+try {
+  _db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+} catch (e) {
+  console.warn('[AstroNuit] Persistence offline indisponible, fallback Firestore standard:', e.message);
+  _db = getFirestore(app);
+}
+export const db = _db;
 
 export const storage = getStorage(app);
 

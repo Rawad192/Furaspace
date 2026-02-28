@@ -3,8 +3,8 @@
  * Remplace : inline <script type="module"> + js/auth.js + js/app.js
  */
 
-import { signIn, signUp, signInGoogle, resetPassword, sendVerification, translateError } from '../services/auth.service.js';
-import { setDocument, getDocument, serverTimestamp } from '../services/firestore.service.js';
+import { signIn, signUp, signInGoogle, resetPassword, sendVerification, updateAuthProfile, translateError } from '../services/auth.service.js';
+import { setDocument, getDocument, updateDocument, serverTimestamp } from '../services/firestore.service.js';
 import { COLLECTIONS } from '../firebase.js';
 import { Toast, initNavbar, registerServiceWorker } from '../utils/app.js';
 import { evaluatePasswordStrength } from '../utils/helpers.js';
@@ -13,9 +13,9 @@ import { redirectIfAuthenticated, getRedirectUrl, getUrlMessage } from '../utils
 // ── Init ────────────────────────────────────────────────────────────────────
 
 async function init() {
-  // Si deja connecte, rediriger
-  await redirectIfAuthenticated(getRedirectUrl() || 'index.html');
-
+  // Attacher TOUS les event listeners immediatement (synchrone)
+  // pour que les boutons repondent des le premier clic.
+  // Ne JAMAIS bloquer l'init sur un await avant d'avoir attache les listeners.
   initNavbar();
   showUrlMessages();
   initTabs();
@@ -26,6 +26,13 @@ async function init() {
   initGoogleAuth();
   initForgotPassword();
   registerServiceWorker();
+
+  // Verifier l'etat auth APRES — si deja connecte, rediriger
+  try {
+    await redirectIfAuthenticated(getRedirectUrl() || 'index.html');
+  } catch (e) {
+    console.warn('[AstroNuit] Vérification auth échouée:', e.message);
+  }
 }
 
 // ── Messages URL ────────────────────────────────────────────────────────────
@@ -142,6 +149,10 @@ function initLoginForm() {
       Toast.warning('Veuillez remplir tous les champs.');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Toast.error('Format d\'email invalide.');
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = '\u23F3 Connexion...';
@@ -160,7 +171,6 @@ function initLoginForm() {
 
       // Mettre a jour lastLogin dans Firestore
       try {
-        const { updateDocument } = await import('../services/firestore.service.js');
         await updateDocument(COLLECTIONS.USERS, cred.user.uid, { lastLogin: serverTimestamp() });
       } catch { /* silencieux — le profil peut ne pas encore exister */ }
 
@@ -194,7 +204,11 @@ function initRegisterForm() {
     const btn = document.getElementById('btn-register-submit');
 
     // Validations
-    if (!pseudo || pseudo.length < 3) {
+    if (!pseudo || !email || !password) {
+      Toast.warning('Veuillez remplir tous les champs obligatoires.');
+      return;
+    }
+    if (pseudo.length < 3) {
       Toast.error('Le pseudo doit faire au moins 3 caracteres.');
       return;
     }
@@ -204,6 +218,10 @@ function initRegisterForm() {
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(pseudo)) {
       Toast.error('Le pseudo ne peut contenir que des lettres, chiffres, tirets et underscores.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Toast.error('Format d\'email invalide.');
       return;
     }
     if (password.length < 8) {
@@ -222,7 +240,6 @@ function initRegisterForm() {
       const cred = await signUp(email, password);
 
       // Mettre a jour le displayName dans Firebase Auth
-      const { updateAuthProfile } = await import('../services/auth.service.js');
       await updateAuthProfile({ displayName: pseudo });
 
       // Creer le profil Firestore
@@ -341,7 +358,6 @@ function initGoogleAuth() {
         Toast.success('Compte Google cree ! Bienvenue sur AstroNuit.');
       } else {
         // Profil existe — mettre a jour lastLogin
-        const { updateDocument } = await import('../services/firestore.service.js');
         await updateDocument(COLLECTIONS.USERS, cred.user.uid, { lastLogin: serverTimestamp() });
         Toast.success('Connexion Google reussie !');
       }
@@ -383,4 +399,6 @@ function initForgotPassword() {
 }
 
 // ── Lancement ───────────────────────────────────────────────────────────────
-init();
+init().catch(err => {
+  console.error('[AstroNuit] Erreur critique lors de l\'initialisation de la page connexion:', err);
+});
