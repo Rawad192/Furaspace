@@ -54,13 +54,19 @@ export async function requireRole(minRole, redirectUrl = 'index.html') {
 
 /**
  * Redirige si l'utilisateur EST déjà connecté (ex: page connexion.html)
+ * Ne bloque jamais l'appelant en cas d'erreur (la page connexion doit toujours s'afficher).
  * @param {string} redirectUrl - URL de redirection si connecté
  * @returns {Promise<void>}
  */
 export async function redirectIfAuthenticated(redirectUrl = 'index.html') {
-  const user = await waitForAuth();
+  let user;
+  try {
+    user = await waitForAuth();
+  } catch (e) {
+    console.warn('[Router] waitForAuth échoué dans redirectIfAuthenticated:', e.message);
+    return; // pas de redirection — on laisse la page s'afficher
+  }
   if (user) {
-    // Vérifier s'il y a un redirect dans l'URL
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
     window.location.href = redirect || redirectUrl;
