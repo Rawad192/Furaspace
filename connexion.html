@@ -40,7 +40,7 @@
             <p>Connectez-vous pour accéder aux sorties</p>
           </div>
 
-          <form class="auth-form" id="form-login">
+          <form class="auth-form" id="form-login" novalidate>
             <div class="form-group">
               <label class="form-label">Adresse email</label>
               <input type="email" class="form-input" id="login-email" placeholder="vous@exemple.fr" required>
@@ -79,7 +79,7 @@
             <p>Créez votre profil d'astronome amateur</p>
           </div>
 
-          <form class="auth-form" id="form-register">
+          <form class="auth-form" id="form-register" novalidate>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Pseudo *</label>
@@ -143,7 +143,7 @@
             <div class="form-group">
               <label class="checkbox-label">
                 <input type="checkbox" id="reg-terms" required>
-                <span>J'accepte la <a href="#">charte communautaire</a> et les <a href="#">mentions légales</a></span>
+                <span>J'accepte la <a href="charte.html" target="_blank" onclick="event.stopPropagation()">charte communautaire</a> et les <a href="mentions-legales.html" target="_blank" onclick="event.stopPropagation()">mentions légales</a></span>
               </label>
             </div>
 

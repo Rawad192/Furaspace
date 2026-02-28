@@ -13,13 +13,9 @@ import { redirectIfAuthenticated, getRedirectUrl, getUrlMessage } from '../utils
 // ── Init ────────────────────────────────────────────────────────────────────
 
 async function init() {
-  // Si deja connecte, rediriger (avec try/catch pour ne pas bloquer l'init des formulaires)
-  try {
-    await redirectIfAuthenticated(getRedirectUrl() || 'index.html');
-  } catch (e) {
-    console.warn('[AstroNuit] Vérification auth échouée, poursuite de l\'init:', e.message);
-  }
-
+  // Attacher TOUS les event listeners immediatement (synchrone)
+  // pour que les boutons repondent des le premier clic.
+  // Ne JAMAIS bloquer l'init sur un await avant d'avoir attache les listeners.
   initNavbar();
   showUrlMessages();
   initTabs();
@@ -30,6 +26,13 @@ async function init() {
   initGoogleAuth();
   initForgotPassword();
   registerServiceWorker();
+
+  // Verifier l'etat auth APRES — si deja connecte, rediriger
+  try {
+    await redirectIfAuthenticated(getRedirectUrl() || 'index.html');
+  } catch (e) {
+    console.warn('[AstroNuit] Vérification auth échouée:', e.message);
+  }
 }
 
 // ── Messages URL ────────────────────────────────────────────────────────────
@@ -146,6 +149,10 @@ function initLoginForm() {
       Toast.warning('Veuillez remplir tous les champs.');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Toast.error('Format d\'email invalide.');
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = '\u23F3 Connexion...';
@@ -197,7 +204,11 @@ function initRegisterForm() {
     const btn = document.getElementById('btn-register-submit');
 
     // Validations
-    if (!pseudo || pseudo.length < 3) {
+    if (!pseudo || !email || !password) {
+      Toast.warning('Veuillez remplir tous les champs obligatoires.');
+      return;
+    }
+    if (pseudo.length < 3) {
       Toast.error('Le pseudo doit faire au moins 3 caracteres.');
       return;
     }
@@ -207,6 +218,10 @@ function initRegisterForm() {
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(pseudo)) {
       Toast.error('Le pseudo ne peut contenir que des lettres, chiffres, tirets et underscores.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Toast.error('Format d\'email invalide.');
       return;
     }
     if (password.length < 8) {
